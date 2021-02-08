@@ -6,7 +6,6 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 
 use Craftzing\Laravel\MollieWebhooks\Config;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Support\Str;
 
 /**
  * @internal This implementation should only be used for testing purposes.

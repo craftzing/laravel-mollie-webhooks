@@ -8,7 +8,6 @@ use Craftzing\Laravel\MollieWebhooks\Exceptions\AppMisconfigured;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Exception;
 use Generator;
-use Illuminate\Support\Str;
 
 use function config;
 
