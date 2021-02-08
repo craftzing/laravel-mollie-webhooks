@@ -2,8 +2,8 @@
 
 ![Quality assurance](https://github.com/craftzing/laravel-mollie-webhooks/workflows/Quality%20assurance/badge.svg)
 ![Code style](https://github.com/craftzing/laravel-mollie-webhooks/workflows/Code%20style/badge.svg)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/881eb71372c1b12c18d5/test_coverage)](https://codeclimate.com/github/craftzing/laravel-mollie-webhooks/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/881eb71372c1b12c18d5/maintainability)](https://codeclimate.com/github/craftzing/laravel-mollie-webhooks/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/f7b1a9a0b5a5499f8b78/test_coverage)](https://codeclimate.com/github/craftzing/laravel-mollie-webhooks/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/f7b1a9a0b5a5499f8b78/maintainability)](https://codeclimate.com/github/craftzing/laravel-mollie-webhooks/maintainability)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat&color=4D6CB8)](https://github.com/craftzing/laravel-mollie-webhooks/blob/master/LICENSE)
 
 This package serves as a starting point to create a new Laravel package. Everything's in place to get you started 
