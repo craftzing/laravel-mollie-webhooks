@@ -12,7 +12,9 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "illuminate/support": "^7.0|^8.0"
+        "illuminate/support": "^7.0|^8.0",
+        "mollie/laravel-mollie": "^2.0",
+        "spatie/laravel-webhook-client": "^2.7"
     },
     "require-dev": {
         "orchestra/testbench": "^5.0|^6.0"
