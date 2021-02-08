@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Craftzing\Laravel\:package_namespace\Testing;
+namespace Craftzing\Laravel\MollieWebhooks\Testing;
 
-use Craftzing\Laravel\:package_namespace\Exceptions\FakeExceptionHandler;
-use Craftzing\Laravel\:package_namespace\ServiceProvider;
-use Craftzing\Laravel\:package_namespace\Testing\Doubles\FakeConfig;
+use Craftzing\Laravel\MollieWebhooks\Exceptions\FakeExceptionHandler;
+use Craftzing\Laravel\MollieWebhooks\ServiceProvider;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeConfig;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;

@@ -1,13 +1,13 @@
 {
-    "name": "craftzing/:package_name",
-    "description": ":package_description",
+    "name": "craftzing/laravel-mollie-webhooks",
+    "description": "Handle Mollie webhooks in a Laravel app",
     "keywords": [],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": ":author_email"
+            "name": "Rémi Pelhate",
+            "email": "remi.pelhate@craftzing.com"
         }
     ],
     "require": {
@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Craftzing\\Laravel\\:package_namespace\\": "src"
+            "Craftzing\\Laravel\\MollieWebhooks\\": "src"
         }
     },
     "config": {

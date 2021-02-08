@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Craftzing\Laravel\:package_namespace;
+namespace Craftzing\Laravel\MollieWebhooks;
 
-use Craftzing\Laravel\:package_namespace\Exceptions\AppMisconfigured;
-use Craftzing\Laravel\:package_namespace\Testing\IntegrationTestCase;
+use Craftzing\Laravel\MollieWebhooks\Exceptions\AppMisconfigured;
+use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Exception;
 use Generator;
 use Illuminate\Support\Str;
@@ -19,7 +19,7 @@ final class ConfigTest extends IntegrationTestCase
     public function misconfiguredApp(): Generator
     {
         yield 'Value is undefined' => [
-            [':package_name.value' => null],
+            ['laravel-mollie-webhooks.value' => null],
             AppMisconfigured::missingConfigValue(),
         ];
     }
