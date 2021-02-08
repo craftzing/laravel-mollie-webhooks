@@ -18,6 +18,11 @@ final class PaymentId
         $this->value = $value;
     }
 
+    private static function isValid(string $value): bool
+    {
+        return Str::startsWith($value, self::PREFIX);
+    }
+
     public static function fromString(string $value): self
     {
         if (! self::isValid($value)) {
@@ -35,10 +40,5 @@ final class PaymentId
     public function value(): string
     {
         return $this->value;
-    }
-
-    public static function isValid(string $value): bool
-    {
-        return Str::startsWith($value, self::PREFIX);
     }
 }

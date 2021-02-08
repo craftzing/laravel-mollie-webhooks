@@ -9,6 +9,9 @@ use Generator;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\TestCase;
 
+use function serialize;
+use function unserialize;
+
 final class PaymentIdTest extends TestCase
 {
     private const EXPECTED_PREFIX = 'tr_';
@@ -71,19 +74,14 @@ final class PaymentIdTest extends TestCase
 
     /**
      * @test
-     * @dataProvider invalidMolliePaymentIds
-     */
-    public function itReturnsFalseWhenCheckingAnInvalidValueForValidity(string $value): void
-    {
-        $this->assertFalse(PaymentId::isValid($value));
-    }
-
-    /**
-     * @test
      * @dataProvider validMolliePaymentIds
      */
-    public function itReturnsTrueWhenCheckingAValidValueForValidity(string $value): void
+    public function itCanBeSerialized(string $value): void
     {
-        $this->assertTrue(PaymentId::isValid($value));
+        $paymentId = PaymentId::fromString($value);
+
+        $serializedPaymentId = serialize($paymentId);
+
+        $this->assertEquals($paymentId, unserialize($serializedPaymentId));
     }
 }
