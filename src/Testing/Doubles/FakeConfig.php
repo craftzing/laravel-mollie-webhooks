@@ -16,9 +16,4 @@ final class FakeConfig implements Config
     {
         return $app->instance(Config::class, new self());
     }
-
-    public function isLaravelMollieSdkInstalled(): bool
-    {
-        return false;
-    }
 }
