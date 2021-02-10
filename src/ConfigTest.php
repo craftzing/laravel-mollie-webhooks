@@ -14,6 +14,7 @@ final class ConfigTest extends IntegrationTestCase
 
     /**
      * @test
+     * @group without-laravel-mollie-sdk
      */
     public function itReturnsFalseWhenTheLaravelMollieSdkIsNotInstalled(): void
     {

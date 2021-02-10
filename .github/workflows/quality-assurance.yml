@@ -33,14 +33,20 @@ jobs:
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --prefer-dist --no-interaction
 
-      - name: Run tests & publish code coverage
+      - name: Run tests without optional dependencies
+        run: vendor/bin/phpunit --exclude-group requires-laravel-mollie-sdk --verbose --coverage-clover=coverage-without-optional-deps.clover
+
+      - name: Run tests with Laravel Mollie SDK installed
+        run: |
+          composer require mollie/laravel-mollie:^2.0
+          vendor/bin/phpunit --exclude-group without-laravel-mollie-sdk --verbose --coverage-clover=coverage-with-laravel-mollie-sdk.clover
+
+      - name: Publish code coverage
         uses: paambaati/codeclimate-action@v2.7.5
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_TEST_REPORTER_ID }}
         with:
-          coverageCommand: vendor/bin/phpunit --verbose --coverage-clover=coverage.clover
-          coverageLocations: |
-            ${{github.workspace}}/*.clover:clover
+          coverageLocations: ${{github.workspace}}/*.clover:clover
           debug: true
 
       - name: Run PHPStan analysis
