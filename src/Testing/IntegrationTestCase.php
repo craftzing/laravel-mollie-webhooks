@@ -7,6 +7,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\FakeExceptionHandler;
 use Craftzing\Laravel\MollieWebhooks\MollieWebhooksServiceProvider;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesEvents;
+use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeConfig;
 use CreateWebhookCallsTable;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
@@ -20,6 +21,7 @@ use function env;
 abstract class IntegrationTestCase extends OrchestraTestCase
 {
     use FakesEvents;
+    use FakesMollie;
 
     protected bool $shouldFakeConfig = true;
 
@@ -51,6 +53,7 @@ abstract class IntegrationTestCase extends OrchestraTestCase
         Bus::fake();
         Queue::fake();
         FakeExceptionHandler::swap($this->app);
+        $this->fakeMollie();
 
         if ($this->shouldFakeEvents) {
             $this->fakeEvents();

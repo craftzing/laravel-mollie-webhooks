@@ -6,7 +6,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Commands;
 
 use Craftzing\Laravel\MollieWebhooks\Events\PaymentWasUpdatedOnMollie;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\UnexpectedWebhookPayload;
-use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollieData;
+use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
 use Exception;
@@ -19,8 +19,6 @@ use function compact;
 
 final class ProcessMollieWebhookTest extends IntegrationTestCase
 {
-    use FakesMollieData;
-
     /**
      * @test
      */
