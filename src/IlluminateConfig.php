@@ -4,24 +4,14 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks;
 
-use Craftzing\Laravel\MollieWebhooks\Exceptions\AppMisconfigured;
-use Illuminate\Contracts\Config\Repository;
+use Mollie\Laravel\Wrappers\MollieApiWrapper;
+
+use function class_exists;
 
 final class IlluminateConfig implements Config
 {
-    private string $value;
-
-    public function __construct(Repository $config)
+    public function isLaravelMollieSdkInstalled(): bool
     {
-        $this->value = $this->resolveValue($config);
-    }
-
-    private function resolveValue(Repository $config): string
-    {
-        if (! ($value = $config->get('laravel-mollie-webhooks.value'))) {
-            throw AppMisconfigured::missingConfigValue();
-        }
-
-        return $value;
+        return class_exists(MollieApiWrapper::class);
     }
 }

@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks;
 
-use Craftzing\Laravel\MollieWebhooks\Exceptions\AppMisconfigured;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
-use Exception;
-use Generator;
 
 use function config;
 
@@ -15,24 +12,24 @@ final class ConfigTest extends IntegrationTestCase
 {
     protected bool $shouldFakeConfig = false;
 
-    public function misconfiguredApp(): Generator
+    /**
+     * @test
+     */
+    public function itReturnsFalseWhenTheLaravelMollieSdkIsNotInstalled(): void
     {
-        yield 'Value is undefined' => [
-            ['laravel-mollie-webhooks.value' => null],
-            AppMisconfigured::missingConfigValue(),
-        ];
+        $this->assertFalse(
+            $this->app[Config::class]->isLaravelMollieSdkInstalled(),
+        );
     }
 
     /**
      * @test
-     * @dataProvider misconfiguredApp
+     * @group requires-laravel-mollie-sdk
      */
-    public function itFailsToResolveWhenTheAppIsMisconfigured(array $config, Exception $exception): void
+    public function itReturnsTrueWhenTheLaravelMollieSdkIsInstalled(): void
     {
-        config($config);
-
-        $this->expectExceptionObject($exception);
-
-        $this->app[Config::class];
+        $this->assertTrue(
+            $this->app[Config::class]->isLaravelMollieSdkInstalled(),
+        );
     }
 }
