@@ -12,11 +12,8 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeConfig;
 use CreateWebhookCallsTable;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
-
-use function env;
 
 abstract class IntegrationTestCase extends OrchestraTestCase
 {
@@ -44,8 +41,7 @@ abstract class IntegrationTestCase extends OrchestraTestCase
     {
         $app->useEnvironmentPath(__DIR__ . '/../../');
         $app->bootstrapWith([LoadEnvironmentVariables::class]);
-
-        $app['config']->set('mollie.key', env('MOLLIE_KEY'));
+        $this->setupMollieEnv($app);
     }
 
     protected function setUpTraits(): array

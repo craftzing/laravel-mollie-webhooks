@@ -8,14 +8,21 @@ use Craftzing\Laravel\MollieWebhooks\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieApiClient;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePaymentsEndpoint;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
+use function env;
 use function random_int;
 
 trait FakesMollie
 {
     protected FakePaymentsEndpoint $fakeMolliePayments;
+
+    protected function setupMollieEnv(Application $app): void
+    {
+        $app['config']->set('mollie.key', env('MOLLIE_KEY'));
+    }
 
     /**
      * @internal
@@ -25,13 +32,14 @@ trait FakesMollie
      */
     protected function fakeMollie(): void
     {
+        $this->app['config']->set('mollie.key', 'test_fakeMollieKeyContainingAtLeast30Characters');
         $client = new FakeMollieApiClient();
         $this->fakeMolliePayments = new FakePaymentsEndpoint($client);
         $client->payments = $this->fakeMolliePayments;
 
-        $this->app->extend(
+        $this->swap(
             MollieApiWrapper::class,
-            fn () => new MollieApiWrapper($this->app[Repository::class], $client),
+            new MollieApiWrapper($this->app[Repository::class], $client),
         );
     }
 

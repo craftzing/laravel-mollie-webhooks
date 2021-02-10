@@ -22,9 +22,6 @@
         "phpstan/phpstan": "^0.12.74",
         "phpunit/phpunit": "^9.5"
     },
-    "suggest": {
-        "mollie/laravel-mollie": "Required to use specific events (^2.0)"
-    },
     "autoload": {
         "psr-4": {
             "Craftzing\\Laravel\\MollieWebhooks\\": "src"
