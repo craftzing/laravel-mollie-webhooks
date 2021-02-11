@@ -12,7 +12,14 @@ final class PaymentWasUpdatedOnMollie
 {
     use SerializesModels;
 
+    /**
+     * @readonly
+     */
     public PaymentId $paymentId;
+
+    /**
+     * @readonly
+     */
     public WebhookCall $webhookCall;
 
     public function __construct(PaymentId $paymentId, WebhookCall $webhookCall)

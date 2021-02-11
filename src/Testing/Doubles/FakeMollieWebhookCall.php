@@ -66,6 +66,6 @@ final class FakeMollieWebhookCall
 
     public function create(array $attributes = []): WebhookCall
     {
-        return factory(WebhookCall::class)->create(['payload' => $this->payload] + $attributes);
+        return factory(WebhookCall::class)->create($attributes + ['payload' => $this->payload]);
     }
 }

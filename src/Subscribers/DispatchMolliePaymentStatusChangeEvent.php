@@ -15,7 +15,6 @@ use Mollie\Laravel\Wrappers\MollieApiWrapper;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 use function array_merge;
-use function compact;
 
 final class DispatchMolliePaymentStatusChangeEvent implements ShouldQueue
 {
@@ -58,17 +57,25 @@ final class DispatchMolliePaymentStatusChangeEvent implements ShouldQueue
             return true;
         }
 
-        $lastKnownStatus = $mostRecentWebhookCall->payload['status'] ?: '';
+        $lastKnownStatus = $this->webhookPayload($mostRecentWebhookCall)['status'] ?: '';
 
         return $lastKnownStatus !== $paymentStatus;
     }
 
+    /**
+     * @param array<mixed> $additionalPayload
+     */
     private function enrichWebhookCallPayload(WebhookCall $webhookCall, array $additionalPayload): void
     {
-        $payload = $webhookCall->payload ?: [];
-        $payload = array_merge($payload, $additionalPayload);
+        $webhookCall->update(['payload' => array_merge($this->webhookPayload($webhookCall), $additionalPayload)]);
+    }
 
-        $webhookCall->update(compact('payload'));
+    /**
+     * @return array<mixed>
+     */
+    private function webhookPayload(WebhookCall $webhookCall): array
+    {
+        return $webhookCall->getAttribute('payload') ?: [];
     }
 
     public function subscribe(Dispatcher $events): void

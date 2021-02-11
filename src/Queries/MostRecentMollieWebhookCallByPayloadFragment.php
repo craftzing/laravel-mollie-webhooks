@@ -10,6 +10,9 @@ use Spatie\WebhookClient\Models\WebhookCall;
 
 final class MostRecentMollieWebhookCallByPayloadFragment
 {
+    /**
+     * @param array<mixed> $payload
+     */
     public function before(WebhookCall $ignoreWebhookCall, array $payload): ?WebhookCall
     {
         return WebhookCall::query()
