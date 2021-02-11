@@ -7,7 +7,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 use Craftzing\Laravel\MollieWebhooks\Events\CustomerHasCompletedPaymentOnMollie;
 use Craftzing\Laravel\MollieWebhooks\Events\PaymentWasUpdatedOnMollie;
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
-use Craftzing\Laravel\MollieWebhooks\Testing\Factories\WebhookCallFactory;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
 use Generator;
@@ -43,14 +43,14 @@ final class DispatchMolliePaymentStatusChangeEventTest extends IntegrationTestCa
             fn () => null,
         ];
 
-        foreach (WebhookCallFactory::PAYMENT_STATUSES as $paymentStatus) {
+        foreach (FakeMollieWebhookCall::PAYMENT_STATUSES as $paymentStatus) {
             yield "Payment is currently marked as `$paymentStatus` in the webhook call history" => [
                 function (PaymentId $paymentId) use ($paymentStatus): WebhookCall {
-                    $webhookCallWithoutPaymentStatus = WebhookCallFactory::new()
+                    $webhookCallWithoutPaymentStatus = FakeMollieWebhookCall::new()
                         ->forPaymentId($paymentId)
                         ->create();
 
-                    return WebhookCallFactory::new()
+                    return FakeMollieWebhookCall::new()
                         ->forPaymentId($paymentId)
                         ->withStatusInPayload($paymentStatus)
                         ->create();
@@ -72,7 +72,7 @@ final class DispatchMolliePaymentStatusChangeEventTest extends IntegrationTestCa
             $addWebhookCallHistory($paymentId),
             fn (WebhookCall $webhookCall) => $webhookCall->payload['status'] ?: null,
         );
-        $webhookCall = WebhookCallFactory::new()
+        $webhookCall = FakeMollieWebhookCall::new()
             ->forPaymentId($paymentId)
             ->create();
 
@@ -80,7 +80,7 @@ final class DispatchMolliePaymentStatusChangeEventTest extends IntegrationTestCa
             new PaymentWasUpdatedOnMollie($paymentId, $webhookCall),
         );
 
-        $this->assertDatabaseHas(WebhookCallFactory::TABLE, [
+        $this->assertDatabaseHas(FakeMollieWebhookCall::TABLE, [
             'id' => $webhookCall->getKey(),
             'payload' => json_encode([
                 'id' => $paymentId->value(),

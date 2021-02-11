@@ -10,6 +10,7 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesEvents;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeConfig;
 use CreateWebhookCallsTable;
+use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Queue;
@@ -27,6 +28,7 @@ abstract class IntegrationTestCase extends OrchestraTestCase
         parent::setUp();
 
         $this->setUpDatabase();
+        $this->app[Factory::class]->load(__DIR__ . '/Factories');
     }
 
     protected function setUpDatabase(): void
