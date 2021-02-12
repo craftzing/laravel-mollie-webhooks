@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 
-use Craftzing\Laravel\MollieWebhooks\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Support\Arr;

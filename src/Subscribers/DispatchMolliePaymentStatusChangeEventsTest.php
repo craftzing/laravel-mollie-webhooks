@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToExpired;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToPaid;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
@@ -15,7 +16,6 @@ use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
 use Generator;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Event as IlluminateEvent;
 use Illuminate\Support\Facades\Queue;
 use Mollie\Api\Types\PaymentStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
@@ -41,8 +41,8 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
     {
         $this->dontFakeEvents();
 
-        IlluminateEvent::subscribe(DispatchMolliePaymentStatusChangeEvents::class);
-        IlluminateEvent::dispatch(new MolliePaymentWasUpdated($this->paymentId(), new WebhookCall()));
+        Event::subscribe(DispatchMolliePaymentStatusChangeEvents::class);
+        Event::dispatch(new MolliePaymentWasUpdated($this->paymentId(), new WebhookCall()));
 
         Queue::assertPushed(CallQueuedListener::class, function (CallQueuedListener $listener): bool {
             return $listener->class === DispatchMolliePaymentStatusChangeEvents::class;
@@ -70,32 +70,66 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
      * @test
      * @dataProvider paymentHistory
      */
-    public function itCanHandleWebhookCallsIndicatingAPaymentStatusWasChangedToPaid(callable $addPaymentHistory): void
+    public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToPaid(callable $addPaymentHistory): void
     {
-        $updatedStatus = PaymentStatus::STATUS_PAID;
-        $payment = $this->fakeMolliePayments->fakePaymentWithStatus($updatedStatus);
+        $paid = PaymentStatus::STATUS_PAID;
         $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
-        $paymentId = PaymentId::fromString($payment->id);
-        $webhookCall = FakeMollieWebhookCall::new()
-            ->forResourceId($paymentId)
-            ->create();
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($paid, $addPaymentHistory);
+        $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
         $this->app[DispatchMolliePaymentStatusChangeEvents::class](
             new MolliePaymentWasUpdated($paymentId, $webhookCall),
         );
 
-        if ($latestStatusInPaymentHistory === $updatedStatus) {
+        if ($latestStatusInPaymentHistory === $paid) {
             Event::assertNotDispatched(MolliePaymentStatusChangedToPaid::class);
-
-            return;
+        } else {
+            Event::assertDispatched(
+                MolliePaymentStatusChangedToPaid::class,
+                new TruthTest(function (MolliePaymentStatusChangedToPaid $event) use ($paymentId, $paid): void {
+                    $this->assertSame($paymentId, $event->paymentId);
+                    $this->assertSame($paid, $event->status);
+                }),
+            );
         }
+    }
 
-        Event::assertDispatched(
-            MolliePaymentStatusChangedToPaid::class,
-            new TruthTest(function (MolliePaymentStatusChangedToPaid $event) use ($paymentId, $updatedStatus): void {
-                $this->assertSame($paymentId, $event->paymentId);
-                $this->assertSame($updatedStatus, $event->status);
-            }),
+    /**
+     * @test
+     * @dataProvider paymentHistory
+     */
+    public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToExpired(callable $addPaymentHistory): void
+    {
+        $expired = PaymentStatus::STATUS_EXPIRED;
+        $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($expired, $addPaymentHistory);
+        $paymentId = PaymentId::fromString($webhookCall->payload['id']);
+
+        $this->app[DispatchMolliePaymentStatusChangeEvents::class](
+            new MolliePaymentWasUpdated($paymentId, $webhookCall),
         );
+
+        if ($latestStatusInPaymentHistory === $expired) {
+            Event::assertNotDispatched(MolliePaymentStatusChangedToExpired::class);
+        } else {
+            Event::assertDispatched(
+                MolliePaymentStatusChangedToExpired::class,
+                new TruthTest(function (MolliePaymentStatusChangedToExpired $event) use ($paymentId, $expired): void {
+                    $this->assertSame($paymentId, $event->paymentId);
+                    $this->assertSame($expired, $event->status);
+                }),
+            );
+        }
+    }
+
+    private function webhookCallIndicatingPaymentStatusChangedTo(
+        string $paymentStatus,
+        callable $addPaymentHistory
+    ): WebhookCall {
+        $payment = $this->fakeMolliePayments->fakePaymentWithStatus($paymentStatus);
+
+        return FakeMollieWebhookCall::new()
+            ->forResourceId(PaymentId::fromString($payment->id))
+            ->create();
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToExpired;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToPaid;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
@@ -37,6 +38,14 @@ final class DispatchMolliePaymentStatusChangeEvents implements ShouldQueue
 
         if ($payment->status === PaymentStatus::STATUS_PAID) {
             $this->events->dispatch(new MolliePaymentStatusChangedToPaid($paymentId, $payment->status));
+
+            return;
+        }
+
+        if ($payment->status === PaymentStatus::STATUS_EXPIRED) {
+            $this->events->dispatch(new MolliePaymentStatusChangedToExpired($paymentId, $payment->status));
+
+            return;
         }
     }
 
