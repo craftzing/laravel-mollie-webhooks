@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToExpired;
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToFailed;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToPaid;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
@@ -117,6 +118,34 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
                 new TruthTest(function (MolliePaymentStatusChangedToExpired $event) use ($paymentId, $expired): void {
                     $this->assertSame($paymentId, $event->paymentId);
                     $this->assertSame($expired, $event->status);
+                }),
+            );
+        }
+    }
+
+    /**
+     * @test
+     * @dataProvider paymentHistory
+     */
+    public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToFailed(callable $addPaymentHistory): void
+    {
+        $failed = PaymentStatus::STATUS_FAILED;
+        $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($failed, $addPaymentHistory);
+        $paymentId = PaymentId::fromString($webhookCall->payload['id']);
+
+        $this->app[DispatchMolliePaymentStatusChangeEvents::class](
+            new MolliePaymentWasUpdated($paymentId, $webhookCall),
+        );
+
+        if ($latestStatusInPaymentHistory === $failed) {
+            Event::assertNotDispatched(MolliePaymentStatusChangedToExpired::class);
+        } else {
+            Event::assertDispatched(
+                MolliePaymentStatusChangedToFailed ::class,
+                new TruthTest(function (MolliePaymentStatusChangedToFailed $event) use ($paymentId, $failed): void {
+                    $this->assertSame($paymentId, $event->paymentId);
+                    $this->assertSame($failed, $event->status);
                 }),
             );
         }
