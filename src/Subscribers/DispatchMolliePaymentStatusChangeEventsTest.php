@@ -75,7 +75,7 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
         $updatedStatus = PaymentStatus::STATUS_PAID;
         $payment = $this->fakeMolliePayments->fakePaymentWithStatus($updatedStatus);
         $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
-        $paymentId = new PaymentId($payment->id);
+        $paymentId = PaymentId::fromString($payment->id);
         $webhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($paymentId)
             ->create();

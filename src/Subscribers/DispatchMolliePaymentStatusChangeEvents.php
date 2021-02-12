@@ -28,14 +28,15 @@ final class DispatchMolliePaymentStatusChangeEvents implements ShouldQueue
 
     public function __invoke(PaymentWasUpdatedOnMollie $event): void
     {
-        $payment = $this->payments->get($event->paymentId->value());
+        $paymentId = $event->paymentId;
+        $payment = $this->payments->get($paymentId->value());
 
-        if ($this->paymentHistory->hasLatestStatus($payment->status, $payment)) {
+        if ($this->paymentHistory->hasLatestStatusForPayment($paymentId, $payment->status, $event->webhookCall)) {
             return;
         }
 
         if ($payment->status === PaymentStatus::STATUS_PAID) {
-            $this->events->dispatch(new CustomerHasCompletedPaymentOnMollie($event->paymentId, $payment->status));
+            $this->events->dispatch(new CustomerHasCompletedPaymentOnMollie($paymentId, $payment->status));
         }
     }
 
