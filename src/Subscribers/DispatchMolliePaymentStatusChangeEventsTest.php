@@ -7,7 +7,9 @@ namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 use Craftzing\Laravel\MollieWebhooks\Events\CustomerHasCompletedPaymentOnMollie;
 use Craftzing\Laravel\MollieWebhooks\Events\PaymentWasUpdatedOnMollie;
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\FakePaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
 use Generator;
@@ -18,10 +20,20 @@ use Illuminate\Support\Facades\Queue;
 use Mollie\Api\Types\PaymentStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-use function json_encode;
-
-final class DispatchMolliePaymentStatusChangeEventTest extends IntegrationTestCase
+final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestCase
 {
+    private FakePaymentHistory $fakePaymentHistory;
+
+    /**
+     * @before
+     */
+    public function fakePaymentHistory(): void
+    {
+        $this->afterApplicationCreated(function () {
+            $this->swap(PaymentHistory::class, $this->fakePaymentHistory = new FakePaymentHistory());
+        });
+    }
+
     /**
      * @test
      */
@@ -29,31 +41,26 @@ final class DispatchMolliePaymentStatusChangeEventTest extends IntegrationTestCa
     {
         $this->dontFakeEvents();
 
-        IlluminateEvent::subscribe(DispatchMolliePaymentStatusChangeEvent::class);
+        IlluminateEvent::subscribe(DispatchMolliePaymentStatusChangeEvents::class);
         IlluminateEvent::dispatch(new PaymentWasUpdatedOnMollie($this->paymentId(), new WebhookCall()));
 
         Queue::assertPushed(CallQueuedListener::class, function (CallQueuedListener $listener): bool {
-            return $listener->class === DispatchMolliePaymentStatusChangeEvent::class;
+            return $listener->class === DispatchMolliePaymentStatusChangeEvents::class;
         });
     }
 
-    public function webhookCallHistoryForPayments(): Generator
+    public function paymentHistory(): Generator
     {
-        yield 'Payment has no webhook call history' => [
+        yield 'Payment history does not have status for the payment yet' => [
             fn () => null,
         ];
 
         foreach (FakeMollieWebhookCall::PAYMENT_STATUSES as $paymentStatus) {
-            yield "Payment is currently marked as `$paymentStatus` in the webhook call history" => [
-                function (PaymentId $paymentId) use ($paymentStatus): WebhookCall {
-                    $webhookCallWithoutPaymentStatus = FakeMollieWebhookCall::new()
-                        ->forPaymentId($paymentId)
-                        ->create();
+            yield "Payment history has `$paymentStatus` as the latest status for the payment" => [
+                function (FakePaymentHistory $fakePaymentHistory) use ($paymentStatus): string {
+                    $fakePaymentHistory->fakeLatestStatus($paymentStatus);
 
-                    return FakeMollieWebhookCall::new()
-                        ->forPaymentId($paymentId)
-                        ->withStatusInPayload($paymentStatus)
-                        ->create();
+                    return $paymentStatus;
                 },
             ];
         }
@@ -61,34 +68,23 @@ final class DispatchMolliePaymentStatusChangeEventTest extends IntegrationTestCa
 
     /**
      * @test
-     * @dataProvider webhookCallHistoryForPayments
+     * @dataProvider paymentHistory
      */
-    public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToPaid(callable $addWebhookCallHistory): void
+    public function itCanHandleWebhookCallsIndicatingAPaymentStatusWasChangedToPaid(callable $addPaymentHistory): void
     {
         $updatedStatus = PaymentStatus::STATUS_PAID;
         $payment = $this->fakeMolliePayments->fakePaymentWithStatus($updatedStatus);
+        $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
         $paymentId = new PaymentId($payment->id);
-        $lastKnownPaymentStatus = optional(
-            $addWebhookCallHistory($paymentId),
-            fn (WebhookCall $webhookCall) => $webhookCall->payload['status'] ?: null,
-        );
         $webhookCall = FakeMollieWebhookCall::new()
             ->forPaymentId($paymentId)
             ->create();
 
-        $this->app[DispatchMolliePaymentStatusChangeEvent::class](
+        $this->app[DispatchMolliePaymentStatusChangeEvents::class](
             new PaymentWasUpdatedOnMollie($paymentId, $webhookCall),
         );
 
-        $this->assertDatabaseHas(FakeMollieWebhookCall::TABLE, [
-            'id' => $webhookCall->getKey(),
-            'payload' => json_encode([
-                'id' => $paymentId->value(),
-                'status' => PaymentStatus::STATUS_PAID,
-            ]),
-        ]);
-
-        if ($lastKnownPaymentStatus === $updatedStatus) {
+        if ($latestStatusInPaymentHistory === $updatedStatus) {
             Event::assertNotDispatched(CustomerHasCompletedPaymentOnMollie::class);
 
             return;
