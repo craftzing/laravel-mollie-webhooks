@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToCanceled;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToExpired;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToFailed;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToPaid;
@@ -142,10 +143,38 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
             Event::assertNotDispatched(MolliePaymentStatusChangedToExpired::class);
         } else {
             Event::assertDispatched(
-                MolliePaymentStatusChangedToFailed ::class,
+                MolliePaymentStatusChangedToFailed::class,
                 new TruthTest(function (MolliePaymentStatusChangedToFailed $event) use ($paymentId, $failed): void {
                     $this->assertSame($paymentId, $event->paymentId);
                     $this->assertSame($failed, $event->status);
+                }),
+            );
+        }
+    }
+
+    /**
+     * @test
+     * @dataProvider paymentHistory
+     */
+    public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToCanceled(callable $addPaymentHistory): void
+    {
+        $canceled = PaymentStatus::STATUS_CANCELED;
+        $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($canceled, $addPaymentHistory);
+        $paymentId = PaymentId::fromString($webhookCall->payload['id']);
+
+        $this->app[DispatchMolliePaymentStatusChangeEvents::class](
+            new MolliePaymentWasUpdated($paymentId, $webhookCall),
+        );
+
+        if ($latestStatusInPaymentHistory === $canceled) {
+            Event::assertNotDispatched(MolliePaymentStatusChangedToCanceled::class);
+        } else {
+            Event::assertDispatched(
+                MolliePaymentStatusChangedToCanceled::class,
+                new TruthTest(function (MolliePaymentStatusChangedToCanceled $event) use ($paymentId, $canceled): void {
+                    $this->assertSame($paymentId, $event->paymentId);
+                    $this->assertSame($canceled, $event->status);
                 }),
             );
         }
