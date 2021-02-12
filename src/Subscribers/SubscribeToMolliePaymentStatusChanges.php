@@ -16,7 +16,7 @@ use Mollie\Api\Endpoints\PaymentEndpoint;
 use Mollie\Api\Types\PaymentStatus;
 use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
-final class DispatchMolliePaymentStatusChangeEvents implements ShouldQueue
+final class SubscribeToMolliePaymentStatusChanges implements ShouldQueue
 {
     private PaymentEndpoint $payments;
     private Dispatcher $events;

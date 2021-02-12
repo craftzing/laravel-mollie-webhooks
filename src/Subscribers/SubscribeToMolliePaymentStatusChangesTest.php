@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Queue;
 use Mollie\Api\Types\PaymentStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestCase
+final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCase
 {
     private FakePaymentHistory $fakePaymentHistory;
 
@@ -43,11 +43,11 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
     {
         $this->dontFakeEvents();
 
-        Event::subscribe(DispatchMolliePaymentStatusChangeEvents::class);
+        Event::subscribe(SubscribeToMolliePaymentStatusChanges::class);
         Event::dispatch(new MolliePaymentWasUpdated($this->paymentId(), new WebhookCall()));
 
         Queue::assertPushed(CallQueuedListener::class, function (CallQueuedListener $listener): bool {
-            return $listener->class === DispatchMolliePaymentStatusChangeEvents::class;
+            return $listener->class === SubscribeToMolliePaymentStatusChanges::class;
         });
     }
 
@@ -79,7 +79,7 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
         $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($paid, $addPaymentHistory);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
-        $this->app[DispatchMolliePaymentStatusChangeEvents::class](
+        $this->app[SubscribeToMolliePaymentStatusChanges::class](
             new MolliePaymentWasUpdated($paymentId, $webhookCall),
         );
 
@@ -107,7 +107,7 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
         $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($expired, $addPaymentHistory);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
-        $this->app[DispatchMolliePaymentStatusChangeEvents::class](
+        $this->app[SubscribeToMolliePaymentStatusChanges::class](
             new MolliePaymentWasUpdated($paymentId, $webhookCall),
         );
 
@@ -135,7 +135,7 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
         $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($failed, $addPaymentHistory);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
-        $this->app[DispatchMolliePaymentStatusChangeEvents::class](
+        $this->app[SubscribeToMolliePaymentStatusChanges::class](
             new MolliePaymentWasUpdated($paymentId, $webhookCall),
         );
 
@@ -163,7 +163,7 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
         $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($canceled, $addPaymentHistory);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
-        $this->app[DispatchMolliePaymentStatusChangeEvents::class](
+        $this->app[SubscribeToMolliePaymentStatusChanges::class](
             new MolliePaymentWasUpdated($paymentId, $webhookCall),
         );
 
