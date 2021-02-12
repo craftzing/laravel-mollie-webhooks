@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Support\Arr;
 use Mollie\Api\Types\PaymentStatus;
@@ -45,9 +46,9 @@ final class FakeMollieWebhookCall
         return new self();
     }
 
-    public function forPaymentId(PaymentId $paymentId): self
+    public function forResourceId(ResourceId $resourceId): self
     {
-        return tap(clone $this, fn (self $instance) => $instance->payload['id'] = $paymentId->value());
+        return tap(clone $this, fn (self $instance) => $instance->payload['id'] = $resourceId->value());
     }
 
     public function withStatusInPayload(string $status = ''): self

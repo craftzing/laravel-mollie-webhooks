@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Queries;
 
-use Craftzing\Laravel\MollieWebhooks\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Generator;
 use Illuminate\Foundation\Testing\WithFaker;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-final class MostRecentMollieWebhookCallByPayloadFragmentTest extends IntegrationTestCase
+final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
 {
     use WithFaker;
 
@@ -26,8 +26,8 @@ final class MostRecentMollieWebhookCallByPayloadFragmentTest extends Integration
         ];
 
         yield 'Webhook call history has no recent calls from Mollie for payload fragment' => [
-            fn (PaymentId $paymentId) => FakeMollieWebhookCall::new()
-                ->forPaymentId($paymentId)
+            fn (ResourceId $resourceId) => FakeMollieWebhookCall::new()
+                ->forResourceId($resourceId)
                 ->create(['name' => $this->makeFaker()->name]),
         ];
     }
@@ -38,15 +38,13 @@ final class MostRecentMollieWebhookCallByPayloadFragmentTest extends Integration
      */
     public function itCanHandleNoResults(callable $addWebhookCallHistory): void
     {
-        $paymentId = $this->paymentId();
-        $addWebhookCallHistory($paymentId);
+        $resourceId = $this->paymentId();
+        $addWebhookCallHistory($resourceId);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
-            ->forPaymentId($paymentId)
+            ->forResourceId($resourceId)
             ->create();
 
-        $result = $this->app[MostRecentMollieWebhookCallByPayloadFragment::class]->before($ignoreWebhookCall, [
-            'id' => $paymentId->value(),
-        ]);
+        $result = $this->app[LatestMollieWebhookCallByResourceId::class]->find($resourceId, $ignoreWebhookCall);
 
         $this->assertNull($result);
     }
@@ -54,26 +52,24 @@ final class MostRecentMollieWebhookCallByPayloadFragmentTest extends Integration
     /**
      * @test
      */
-    public function itCanReturnTheMostRecentMollieWebhookCallByPayloadFragment(): void
+    public function itCanFindTheLatestMollieWebhookCallByResourceId(): void
     {
-        $paymentId = $this->paymentId();
-        $mostRecentWebhookCall = FakeMollieWebhookCall::new()
-            ->forPaymentId($paymentId)
+        $resourceId = $this->paymentId();
+        $latestWebhookCall = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
             ->withStatusInPayload()
             ->create(['created_at' => 'yesterday 09:00']);
         $olderWebhookCall = FakeMollieWebhookCall::new()
-            ->forPaymentId($paymentId)
+            ->forResourceId($resourceId)
             ->withStatusInPayload()
             ->create(['created_at' => '2 weeks ago 18:30']);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
-            ->forPaymentId($paymentId)
+            ->forResourceId($resourceId)
             ->create();
 
-        $result = $this->app[MostRecentMollieWebhookCallByPayloadFragment::class]->before($ignoreWebhookCall, [
-            'id' => $paymentId->value(),
-        ]);
+        $result = $this->app[LatestMollieWebhookCallByResourceId::class]->find($resourceId, $ignoreWebhookCall);
 
         $this->assertInstanceOf(WebhookCall::class, $result);
-        $this->assertTrue($result->is($mostRecentWebhookCall));
+        $this->assertTrue($result->is($latestWebhookCall));
     }
 }
