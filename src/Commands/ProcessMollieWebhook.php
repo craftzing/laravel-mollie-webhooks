@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Commands;
 
-use Craftzing\Laravel\MollieWebhooks\Events\PaymentWasUpdatedOnMollie;
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidPaymentId;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\UnexpectedWebhookPayload;
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
@@ -31,6 +31,6 @@ final class ProcessMollieWebhook extends ProcessWebhookJob
 
     private function handlePaymentEvent(PaymentId $paymentId, Dispatcher $events): void
     {
-        $events->dispatch(new PaymentWasUpdatedOnMollie($paymentId, $this->webhookCall));
+        $events->dispatch(new MolliePaymentWasUpdated($paymentId, $this->webhookCall));
     }
 }

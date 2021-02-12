@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
-use Craftzing\Laravel\MollieWebhooks\Events\CustomerHasCompletedPaymentOnMollie;
-use Craftzing\Laravel\MollieWebhooks\Events\PaymentWasUpdatedOnMollie;
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToPaid;
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
@@ -42,7 +42,7 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
         $this->dontFakeEvents();
 
         IlluminateEvent::subscribe(DispatchMolliePaymentStatusChangeEvents::class);
-        IlluminateEvent::dispatch(new PaymentWasUpdatedOnMollie($this->paymentId(), new WebhookCall()));
+        IlluminateEvent::dispatch(new MolliePaymentWasUpdated($this->paymentId(), new WebhookCall()));
 
         Queue::assertPushed(CallQueuedListener::class, function (CallQueuedListener $listener): bool {
             return $listener->class === DispatchMolliePaymentStatusChangeEvents::class;
@@ -81,18 +81,18 @@ final class DispatchMolliePaymentStatusChangeEventsTest extends IntegrationTestC
             ->create();
 
         $this->app[DispatchMolliePaymentStatusChangeEvents::class](
-            new PaymentWasUpdatedOnMollie($paymentId, $webhookCall),
+            new MolliePaymentWasUpdated($paymentId, $webhookCall),
         );
 
         if ($latestStatusInPaymentHistory === $updatedStatus) {
-            Event::assertNotDispatched(CustomerHasCompletedPaymentOnMollie::class);
+            Event::assertNotDispatched(MolliePaymentStatusChangedToPaid::class);
 
             return;
         }
 
         Event::assertDispatched(
-            CustomerHasCompletedPaymentOnMollie::class,
-            new TruthTest(function (CustomerHasCompletedPaymentOnMollie $event) use ($paymentId, $updatedStatus): void {
+            MolliePaymentStatusChangedToPaid::class,
+            new TruthTest(function (MolliePaymentStatusChangedToPaid $event) use ($paymentId, $updatedStatus): void {
                 $this->assertSame($paymentId, $event->paymentId);
                 $this->assertSame($updatedStatus, $event->status);
             }),

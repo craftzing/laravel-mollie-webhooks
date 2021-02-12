@@ -8,7 +8,7 @@ use Craftzing\Laravel\MollieWebhooks\PaymentId;
 use Illuminate\Queue\SerializesModels;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-final class PaymentWasUpdatedOnMollie
+final class MolliePaymentWasUpdated
 {
     use SerializesModels;
 

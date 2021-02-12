@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
-use Craftzing\Laravel\MollieWebhooks\Events\CustomerHasCompletedPaymentOnMollie;
-use Craftzing\Laravel\MollieWebhooks\Events\PaymentWasUpdatedOnMollie;
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToPaid;
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,7 +26,7 @@ final class DispatchMolliePaymentStatusChangeEvents implements ShouldQueue
         $this->paymentHistory = $paymentHistory;
     }
 
-    public function __invoke(PaymentWasUpdatedOnMollie $event): void
+    public function __invoke(MolliePaymentWasUpdated $event): void
     {
         $paymentId = $event->paymentId;
         $payment = $this->payments->get($paymentId->value());
@@ -36,12 +36,12 @@ final class DispatchMolliePaymentStatusChangeEvents implements ShouldQueue
         }
 
         if ($payment->status === PaymentStatus::STATUS_PAID) {
-            $this->events->dispatch(new CustomerHasCompletedPaymentOnMollie($paymentId, $payment->status));
+            $this->events->dispatch(new MolliePaymentStatusChangedToPaid($paymentId, $payment->status));
         }
     }
 
     public function subscribe(Dispatcher $events): void
     {
-        $events->listen(PaymentWasUpdatedOnMollie::class, self::class);
+        $events->listen(MolliePaymentWasUpdated::class, self::class);
     }
 }

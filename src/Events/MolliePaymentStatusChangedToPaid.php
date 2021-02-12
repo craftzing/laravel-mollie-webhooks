@@ -6,7 +6,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Events;
 
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
 
-final class CustomerHasCompletedPaymentOnMollie
+final class MolliePaymentStatusChangedToPaid
 {
     /**
      * @readonly
