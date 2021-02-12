@@ -7,6 +7,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Queries;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
+use Craftzing\Laravel\MollieWebhooks\WebhookPayloadFragment;
 use Generator;
 use Illuminate\Foundation\Testing\WithFaker;
 use Spatie\WebhookClient\Models\WebhookCall;
@@ -71,5 +72,38 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
 
         $this->assertInstanceOf(WebhookCall::class, $result);
         $this->assertTrue($result->is($latestWebhookCall));
+    }
+
+    /**
+     * @test
+     */
+    public function itCanBeFilteredByAPayloadFragment(): void
+    {
+        $resourceId = $this->paymentId();
+        $webhookCallWithOnlyStatusInPayload = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
+            ->withStatusInPayload()
+            ->create();
+        $webhookCallWithFragmentInPayload = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
+            ->withStatusInPayload()
+            ->appendToPayload(['foo' => 'bar'])
+            ->create();
+        $webhookCallWithoutFragmentInPayload = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
+            ->appendToPayload(['bar' => 'foo'])
+            ->create();
+        $ignoreWebhookCall = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
+            ->create();
+
+        $result = $this->app[LatestMollieWebhookCallByResourceId::class]->find(
+            $resourceId,
+            $ignoreWebhookCall,
+            WebhookPayloadFragment::fromKeys('status', 'foo'),
+        );
+
+        $this->assertInstanceOf(WebhookCall::class, $result);
+        $this->assertTrue($result->is($webhookCallWithFragmentInPayload));
     }
 }

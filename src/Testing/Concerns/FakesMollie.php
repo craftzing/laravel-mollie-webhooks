@@ -6,12 +6,15 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing\Concerns;
 
 use Craftzing\Laravel\MollieWebhooks\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieApiClient;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePaymentsEndpoint;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
+use function array_filter;
 use function env;
 use function random_int;
 
@@ -46,5 +49,15 @@ trait FakesMollie
     protected function paymentId(): PaymentId
     {
         return PaymentId::fromString(PaymentId::PREFIX . Str::random(random_int(4, 16)));
+    }
+
+    protected function randomPaymentStatusExcept(string $excludeStatus = ''): string
+    {
+        $statuses = array_filter(
+            FakeMollieWebhookCall::PAYMENT_STATUSES,
+            fn (string $status) => $status !== $excludeStatus,
+        );
+
+        return Arr::random($statuses);
     }
 }
