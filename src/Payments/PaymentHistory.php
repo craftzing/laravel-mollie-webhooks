@@ -9,5 +9,9 @@ use Spatie\WebhookClient\Models\WebhookCall;
 
 interface PaymentHistory
 {
-    public function hasLatestStatusForPayment(PaymentId $paymentId, string $status, WebhookCall $webhookCall): bool;
+    public function hasLatestStatusForPayment(
+        PaymentId $paymentId,
+        string $status,
+        WebhookCall $ongoingWebhookCall
+    ): bool;
 }

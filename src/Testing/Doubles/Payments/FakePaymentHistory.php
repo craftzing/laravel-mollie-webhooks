@@ -12,8 +12,11 @@ final class FakePaymentHistory implements PaymentHistory
 {
     private ?string $latestStatus = null;
 
-    public function hasLatestStatusForPayment(PaymentId $paymentId, string $status, WebhookCall $webhookCall): bool
-    {
+    public function hasLatestStatusForPayment(
+        PaymentId $paymentId,
+        string $status,
+        WebhookCall $ongoingWebhookCall
+    ): bool {
         return $this->latestStatus === $status;
     }
 

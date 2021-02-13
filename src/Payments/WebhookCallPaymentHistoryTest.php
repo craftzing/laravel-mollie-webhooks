@@ -17,11 +17,11 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
     public function webhookCallHistory(): Generator
     {
         yield 'No webhook calls were made for the payment so far' => [
-            fn () => false,
+            fn (): bool => false,
         ];
 
         yield 'Latest payment status in the webhook call history differs from the one in the current webhook call' => [
-            function (PaymentId $paymentId, string $status) {
+            function (PaymentId $paymentId, string $status): bool {
                 $latestStatus = $this->randomPaymentStatusExcept($status);
                 $latestWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
@@ -33,7 +33,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
         ];
 
         yield 'Latest payment status in the webhook call history matches from the one in the current webhook call' => [
-            function (PaymentId $paymentId, string $status) {
+            function (PaymentId $paymentId, string $status): bool {
                 $latestWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
                     ->withStatusInPayload($status)
@@ -44,7 +44,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
         ];
 
         yield 'Latest webhook call for the payment did not include the status, but a webhook call before it does' => [
-            function (PaymentId $paymentId, string $status) {
+            function (PaymentId $paymentId, string $status): bool {
                 $secondALastWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
                     ->withStatusInPayload($status)
@@ -66,7 +66,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
     {
         $paymentId = $this->paymentId();
         $status = PaymentStatus::STATUS_PAID;
-        $shouldHaveLatestStatusForPayment = $resolveExpectedResult($paymentId, $status);
+        $expectedToHaveSameLatestStatus = $resolveExpectedResult($paymentId, $status);
         $webhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($paymentId)
             ->create();
@@ -77,15 +77,23 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
             $webhookCall,
         );
 
-        $this->assertSame($shouldHaveLatestStatusForPayment, $result);
-
-        // No matter the result, the payload of the current webhook call should always be updated with the status...
+        $this->assertSame($expectedToHaveSameLatestStatus, $result);
         $this->assertDatabaseHas(FakeMollieWebhookCall::TABLE, [
             'id' => $webhookCall->getKey(),
-            'payload' => json_encode([
-                'id' => $paymentId->value(),
-                'status' => $status,
-            ]),
+            'payload' => json_encode($this->expectedPayload($paymentId, $status, $expectedToHaveSameLatestStatus)),
         ]);
+    }
+
+    private function expectedPayload(PaymentId $paymentId, string $status, bool $expectedToHaveSameLatestStatus): array
+    {
+        $expectedPayload = ['id' => $paymentId->value()];
+
+        // Only when the PaymentHistory is not expected to have the same latest status, we should
+        // expect the freshly retrieved status to be persisted to the ongoing webhook call payload.
+        if (! $expectedToHaveSameLatestStatus) {
+            $expectedPayload['status'] = $status;
+        }
+
+        return $expectedPayload;
     }
 }
