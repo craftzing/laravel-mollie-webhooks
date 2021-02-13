@@ -6,7 +6,6 @@ namespace Craftzing\Laravel\MollieWebhooks\Commands;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\UnexpectedWebhookPayload;
-use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
 use Exception;

@@ -31,7 +31,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
      */
     public function fakePaymentHistory(): void
     {
-        $this->afterApplicationCreated(function () {
+        $this->afterApplicationCreated(function (): void {
             $this->swap(PaymentHistory::class, $this->fakePaymentHistory = new FakePaymentHistory());
         });
     }
