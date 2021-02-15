@@ -5,41 +5,17 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Payments;
 
 use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidPaymentId;
-use Craftzing\Laravel\MollieWebhooks\ResourceId;
+use Craftzing\Laravel\MollieWebhooks\PrefixedResourceId;
 use Illuminate\Support\Str;
 
-final class PaymentId implements ResourceId
+final class PaymentId extends PrefixedResourceId
 {
     public const PREFIX = 'tr_';
 
-    private string $value;
-
-    private function __construct(string $value)
+    protected function failWhenPrefixIsInvalid(string $value)
     {
-        $this->value = $value;
-    }
-
-    private static function isValid(string $value): bool
-    {
-        return Str::startsWith($value, self::PREFIX);
-    }
-
-    public static function fromString(string $value): self
-    {
-        if (! self::isValid($value)) {
+        if (! Str::startsWith($value, self::PREFIX)) {
             throw InvalidPaymentId::missingExpectedPrefix($value);
         }
-
-        return new self($value);
-    }
-
-    public function __toString(): string
-    {
-        return $this->value;
-    }
-
-    public function value(): string
-    {
-        return $this->value;
     }
 }
