@@ -14,18 +14,16 @@ final class FakePaymentsEndpoint extends PaymentEndpoint
     use FakesMollie;
 
     /**
-     * @var \Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\PaymentProphecy[]
+     * @var \Mollie\Api\Resources\Payment[]
      */
-    private array $paymentProphecies = [];
+    private array $payments = [];
 
     /**
      * {@inheritdoc}
      */
-    public function fakePayment(): PaymentProphecy
+    public function fakePayment(PaymentProphecy $prophecy): Payment
     {
-        $payment = new Payment($this->client);
-
-        return $this->paymentProphecies[] = new PaymentProphecy($payment);
+        return $this->payments[] = $prophecy->apply(new Payment($this->client));
     }
 
     /**
@@ -33,9 +31,9 @@ final class FakePaymentsEndpoint extends PaymentEndpoint
      */
     public function get($paymentId, array $parameters = []): Payment
     {
-        foreach ($this->paymentProphecies as $prophecy) {
-            if ($prophecy->payment->id === $paymentId) {
-                return $prophecy->payment;
+        foreach ($this->payments as $payment) {
+            if ($payment->id === $paymentId) {
+                return $payment;
             }
         }
     }

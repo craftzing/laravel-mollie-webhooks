@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments;
 
+use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Mollie\Api\Resources\Payment;
 
@@ -12,21 +13,34 @@ final class PaymentProphecy
     use FakesMollie;
 
     /**
-     * @readonly
+     * @var array<callable>
      */
-    public Payment $payment;
+    private array $prophecies = [];
 
-    public function __construct(Payment $payment)
+    public static function make(): self
     {
-        $payment->id = $this->paymentId()->value();
-        $payment->status = $this->randomPaymentStatusExcept();
-
-        $this->payment = $payment;
+        return new self();
     }
 
-    public function withStatus(string $status): self
+    public function apply(Payment $payment): Payment
     {
-        $this->payment->status = $status;
+        foreach ($this->prophecies as $prophecy) {
+            $prophecy($payment);
+        }
+
+        return $payment;
+    }
+
+    public function id(PaymentId $id): self
+    {
+        $this->prophecies[] = fn (Payment $payment) => $payment->id = $id->value();
+
+        return $this;
+    }
+
+    public function status(string $status): self
+    {
+        $this->prophecies[] = fn (Payment $payment) => $payment->status = $status;
 
         return $this;
     }

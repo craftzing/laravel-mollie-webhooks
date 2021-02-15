@@ -13,6 +13,7 @@ use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\FakePaymentHistory;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\PaymentProphecy;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
 use Generator;
@@ -178,9 +179,9 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
 
     private function webhookCallIndicatingPaymentStatusChangedTo(string $paymentStatus): WebhookCall
     {
-        $payment = $this->fakeMolliePayments->fakePayment()
-            ->withStatus($paymentStatus)
-            ->payment;
+        $payment = $this->fakeMolliePayments->fakePayment(
+            PaymentProphecy::make()->status($paymentStatus),
+        );
 
         return FakeMollieWebhookCall::new()
             ->forResourceId(PaymentId::fromString($payment->id))
