@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Craftzing\Laravel\MollieWebhooks;
+namespace Craftzing\Laravel\MollieWebhooks\Payments;
 
 use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidPaymentId;
+use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Illuminate\Support\Str;
 
 final class PaymentId implements ResourceId

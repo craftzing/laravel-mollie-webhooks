@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Http\Requests;
 
 use Craftzing\Laravel\MollieWebhooks\Commands\ProcessMollieWebhook;
-use Craftzing\Laravel\MollieWebhooks\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;

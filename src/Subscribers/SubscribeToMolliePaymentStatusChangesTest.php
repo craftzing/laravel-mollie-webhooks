@@ -9,7 +9,7 @@ use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToExpired;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToFailed;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentStatusChangedToPaid;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
-use Craftzing\Laravel\MollieWebhooks\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\FakePaymentHistory;
@@ -76,7 +76,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
     {
         $paid = PaymentStatus::STATUS_PAID;
         $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
-        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($paid, $addPaymentHistory);
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($paid);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
         $this->app[SubscribeToMolliePaymentStatusChanges::class](
@@ -104,7 +104,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
     {
         $expired = PaymentStatus::STATUS_EXPIRED;
         $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
-        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($expired, $addPaymentHistory);
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($expired);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
         $this->app[SubscribeToMolliePaymentStatusChanges::class](
@@ -132,7 +132,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
     {
         $failed = PaymentStatus::STATUS_FAILED;
         $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
-        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($failed, $addPaymentHistory);
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($failed);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
         $this->app[SubscribeToMolliePaymentStatusChanges::class](
@@ -160,7 +160,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
     {
         $canceled = PaymentStatus::STATUS_CANCELED;
         $latestStatusInPaymentHistory = $addPaymentHistory($this->fakePaymentHistory);
-        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($canceled, $addPaymentHistory);
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($canceled);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
         $this->app[SubscribeToMolliePaymentStatusChanges::class](
@@ -180,10 +180,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         }
     }
 
-    private function webhookCallIndicatingPaymentStatusChangedTo(
-        string $paymentStatus,
-        callable $addPaymentHistory
-    ): WebhookCall {
+    private function webhookCallIndicatingPaymentStatusChangedTo(string $paymentStatus): WebhookCall
+    {
         $payment = $this->fakeMolliePayments->fakePaymentWithStatus($paymentStatus);
 
         return FakeMollieWebhookCall::new()
