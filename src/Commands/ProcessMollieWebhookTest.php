@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Commands;
 
-use Craftzing\Laravel\MollieWebhooks\Events\PaymentWasUpdated;
+use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\UnexpectedWebhookPayload;
-use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollieData;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
 use Exception;
@@ -19,8 +18,6 @@ use function compact;
 
 final class ProcessMollieWebhookTest extends IntegrationTestCase
 {
-    use FakesMollieData;
-
     /**
      * @test
      */
@@ -72,8 +69,8 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
         $this->handle(new ProcessMollieWebhook($webhookCall));
 
         Event::assertDispatched(
-            PaymentWasUpdated::class,
-            new TruthTest(function (PaymentWasUpdated $event) use ($paymentId, $webhookCall): void {
+            MolliePaymentWasUpdated::class,
+            new TruthTest(function (MolliePaymentWasUpdated $event) use ($paymentId, $webhookCall): void {
                 $this->assertSame($event->paymentId->value(), $paymentId->value());
                 $this->assertTrue($event->webhookCall->is($webhookCall));
             }),

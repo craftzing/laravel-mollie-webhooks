@@ -7,13 +7,13 @@ namespace Craftzing\Laravel\MollieWebhooks;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidPaymentId;
 use Illuminate\Support\Str;
 
-final class PaymentId
+final class PaymentId implements ResourceId
 {
     public const PREFIX = 'tr_';
 
     private string $value;
 
-    public function __construct(string $value)
+    private function __construct(string $value)
     {
         $this->value = $value;
     }

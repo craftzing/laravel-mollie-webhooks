@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks;
 
 use Craftzing\Laravel\MollieWebhooks\Http\Requests\HandleMollieWebhooksRequest;
+use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
+use Craftzing\Laravel\MollieWebhooks\Payments\WebhookCallPaymentHistory;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,5 +30,6 @@ final class MollieWebhooksServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(self::CONFIG_PATH, 'mollie-webhooks');
 
         $this->app->bind(Config::class, IlluminateConfig::class);
+        $this->app->bind(PaymentHistory::class, WebhookCallPaymentHistory::class);
     }
 }

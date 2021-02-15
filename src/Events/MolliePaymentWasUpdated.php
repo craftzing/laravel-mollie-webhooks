@@ -8,11 +8,18 @@ use Craftzing\Laravel\MollieWebhooks\PaymentId;
 use Illuminate\Queue\SerializesModels;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-final class PaymentWasUpdated
+final class MolliePaymentWasUpdated
 {
     use SerializesModels;
 
+    /**
+     * @readonly
+     */
     public PaymentId $paymentId;
+
+    /**
+     * @readonly
+     */
     public WebhookCall $webhookCall;
 
     public function __construct(PaymentId $paymentId, WebhookCall $webhookCall)

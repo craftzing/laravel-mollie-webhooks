@@ -6,19 +6,21 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing;
 
 use Craftzing\Laravel\MollieWebhooks\Exceptions\FakeExceptionHandler;
 use Craftzing\Laravel\MollieWebhooks\MollieWebhooksServiceProvider;
+use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesEvents;
+use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeConfig;
 use CreateWebhookCallsTable;
+use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
-use function env;
-
 abstract class IntegrationTestCase extends OrchestraTestCase
 {
-    protected bool $shouldFakeEvents = true;
+    use FakesEvents;
+    use FakesMollie;
+
     protected bool $shouldFakeConfig = true;
 
     public function setUp(): void
@@ -26,6 +28,7 @@ abstract class IntegrationTestCase extends OrchestraTestCase
         parent::setUp();
 
         $this->setUpDatabase();
+        $this->app[Factory::class]->load(__DIR__ . '/Factories');
     }
 
     protected function setUpDatabase(): void
@@ -40,8 +43,7 @@ abstract class IntegrationTestCase extends OrchestraTestCase
     {
         $app->useEnvironmentPath(__DIR__ . '/../../');
         $app->bootstrapWith([LoadEnvironmentVariables::class]);
-
-        $app['config']->set('mollie.key', env('MOLLIE_KEY'));
+        $this->setupMollieEnv($app);
     }
 
     protected function setUpTraits(): array
@@ -49,9 +51,10 @@ abstract class IntegrationTestCase extends OrchestraTestCase
         Bus::fake();
         Queue::fake();
         FakeExceptionHandler::swap($this->app);
+        $this->fakeMollie();
 
         if ($this->shouldFakeEvents) {
-            Event::fake();
+            $this->fakeEvents();
         }
 
         if ($this->shouldFakeConfig) {

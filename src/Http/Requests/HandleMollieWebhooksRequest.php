@@ -7,17 +7,17 @@ namespace Craftzing\Laravel\MollieWebhooks\Http\Requests;
 use Craftzing\Laravel\MollieWebhooks\Commands\ProcessMollieWebhook;
 use Craftzing\Laravel\MollieWebhooks\Config;
 use Craftzing\Laravel\MollieWebhooks\Http\MollieSignatureValidator;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Spatie\WebhookClient\Models\WebhookCall;
 use Spatie\WebhookClient\WebhookConfig;
 use Spatie\WebhookClient\WebhookProcessor;
 use Spatie\WebhookClient\WebhookProfile\ProcessEverythingWebhookProfile;
+use Symfony\Component\HttpFoundation\Response;
 
 final class HandleMollieWebhooksRequest extends Controller
 {
-    public function __invoke(Request $request, Config $config): JsonResponse
+    public function __invoke(Request $request, Config $config): Response
     {
         $webhookConfig = new WebhookConfig([
             'name' => MollieSignatureValidator::NAME,
@@ -27,8 +27,6 @@ final class HandleMollieWebhooksRequest extends Controller
             'process_webhook_job' => ProcessMollieWebhook::class,
         ]);
 
-        (new WebhookProcessor($request, $webhookConfig))->process();
-
-        return response()->json(['message' => 'ok']);
+        return (new WebhookProcessor($request, $webhookConfig))->process();
     }
 }

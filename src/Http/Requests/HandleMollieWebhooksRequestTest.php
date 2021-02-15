@@ -14,6 +14,8 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Str;
 
+use function json_encode;
+
 final class HandleMollieWebhooksRequestTest extends IntegrationTestCase
 {
     use RefreshDatabase;
@@ -75,13 +77,14 @@ final class HandleMollieWebhooksRequestTest extends IntegrationTestCase
 
     /**
      * @test
-     * @dataProvider invalidPayloads
+     * @dataProvider validPayloads
      */
     public function itCanHandleIncomingMollieWebhooks(array $payload): void
     {
         $response = $this->post(self::URI, $payload);
 
         $response->assertOk();
+        $this->assertDatabaseHas('webhook_calls', ['payload' => json_encode($payload)]);
         Bus::assertDispatched(ProcessMollieWebhook::class);
     }
 }

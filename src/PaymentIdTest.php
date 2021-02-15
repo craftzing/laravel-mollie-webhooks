@@ -84,4 +84,14 @@ final class PaymentIdTest extends TestCase
 
         $this->assertEquals($paymentId, unserialize($serializedPaymentId));
     }
+
+    /**
+     * @test
+     */
+    public function itCanBeUsedAsAResourceId(): void
+    {
+        $paymentId = PaymentId::fromString(self::EXPECTED_PREFIX . Str::random(8));
+
+        $this->assertInstanceOf(ResourceId::class, $paymentId);
+    }
 }

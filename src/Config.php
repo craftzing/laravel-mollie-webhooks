@@ -6,4 +6,5 @@ namespace Craftzing\Laravel\MollieWebhooks;
 
 interface Config
 {
+    //
 }
