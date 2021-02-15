@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Payments;
 
+use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Generator;
-use Mollie\Api\Types\PaymentStatus;
+use Mollie\Api\Types\RefundStatus;
 
+use function array_merge;
+use function compact;
 use function json_encode;
 
 final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
 {
-    public function webhookCallHistory(): Generator
+    public function paymentWebhookCallHistory(): Generator
     {
         yield 'No webhook calls were made for the payment so far' => [
             fn (): bool => false,
@@ -59,12 +62,12 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
 
     /**
      * @test
-     * @dataProvider webhookCallHistory
+     * @dataProvider paymentWebhookCallHistory
      */
     public function itCanCheckIfItHasALatestStatusForAPayment(callable $resolveExpectedResult): void
     {
         $paymentId = $this->paymentId();
-        $status = PaymentStatus::STATUS_PAID;
+        $status = $this->randomPaymentStatusExcept();
         $expectedToHaveSameLatestStatus = $resolveExpectedResult($paymentId, $status);
         $webhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($paymentId)
@@ -79,20 +82,100 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
         $this->assertSame($expectedToHaveSameLatestStatus, $result);
         $this->assertDatabaseHas(FakeMollieWebhookCall::TABLE, [
             'id' => $webhookCall->getKey(),
-            'payload' => json_encode($this->expectedPayload($paymentId, $status, $expectedToHaveSameLatestStatus)),
+            'payload' => json_encode(array_merge(
+                ['id' => $paymentId->value()],
+
+                // Only when the PaymentHistory is not expected to have the same latest status, we should
+                // expect the freshly retrieved status to be persisted to the ongoing webhook call payload.
+                ! $expectedToHaveSameLatestStatus ? compact('status') : [],
+            )),
         ]);
     }
 
-    private function expectedPayload(PaymentId $paymentId, string $status, bool $expectedToHaveSameLatestStatus): array
+    public function refundsWebhookCallHistory(): Generator
     {
-        $expectedPayload = ['id' => $paymentId->value()];
+        yield 'No webhook calls were made for the payment so far' => [
+            fn (): bool => false,
+        ];
 
-        // Only when the PaymentHistory is not expected to have the same latest status, we should
-        // expect the freshly retrieved status to be persisted to the ongoing webhook call payload.
-        if (! $expectedToHaveSameLatestStatus) {
-            $expectedPayload['status'] = $status;
-        }
+        yield 'Payment has no refunds in the webhook call history' => [
+            function (PaymentId $paymentId): bool {
+                $latestWebhookCall = FakeMollieWebhookCall::new()
+                    ->forResourceId($paymentId)
+                    ->create();
 
-        return $expectedPayload;
+                return false;
+            },
+        ];
+
+        yield 'Payment has same transferred refund in the webhook call history' => [
+            function (PaymentId $paymentId, RefundId $refundId): bool {
+                $latestWebhookCall = FakeMollieWebhookCall::new()
+                    ->forResourceId($paymentId)
+                    ->withRefundInPayload($refundId)
+                    ->create();
+
+                return true;
+            },
+        ];
+
+        yield 'Payment has same refund with different status in the webhook call history' => [
+            function (PaymentId $paymentId, RefundId $refundId): bool {
+                $latestWebhookCall = FakeMollieWebhookCall::new()
+                    ->forResourceId($paymentId)
+                    ->withRefundInPayload($refundId, $this->randomRefundStatusExcept(RefundStatus::STATUS_REFUNDED))
+                    ->create();
+
+                return false;
+            },
+        ];
+
+        yield 'Payment has a different transferred refund in the webhook call history' => [
+            function (PaymentId $paymentId, RefundId $refundId): bool {
+                $latestWebhookCall = FakeMollieWebhookCall::new()
+                    ->forResourceId($paymentId)
+                    ->withRefundInPayload()
+                    ->create();
+
+                return false;
+            },
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider refundsWebhookCallHistory
+     */
+    public function itCanCheckIfItHasATransferredRefundForAPayment(callable $resolveExpectedResult): void
+    {
+        $paymentId = $this->paymentId();
+        $refundId = $this->refundId();
+        $expectedToHaveTransferredRefund = $resolveExpectedResult($paymentId, $refundId);
+        $webhookCall = FakeMollieWebhookCall::new()
+            ->forResourceId($paymentId)
+            ->create();
+
+        $result = $this->app[WebhookCallPaymentHistory::class]->hasTransferredRefundForPayment(
+            $paymentId,
+            $refundId,
+            $webhookCall,
+        );
+
+        $this->assertSame($expectedToHaveTransferredRefund, $result);
+        $this->assertDatabaseHas(FakeMollieWebhookCall::TABLE, [
+            'id' => $webhookCall->getKey(),
+            'payload' => json_encode(array_merge(
+                ['id' => $paymentId->value()],
+
+                // Only when the PaymentHistory is not expected to have the transferred refund, we should expect
+                // the freshly retrieved RefundId to be persisted to the ongoing webhook call payload.
+                ! $expectedToHaveTransferredRefund ? [
+                    'refund' => [
+                        'id' => $refundId->value(),
+                        'status' => RefundStatus::STATUS_REFUNDED,
+                    ],
+                ] : [],
+            )),
+        ]);
     }
 }

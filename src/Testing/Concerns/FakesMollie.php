@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Concerns;
 
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieApiClient;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePaymentsEndpoint;
@@ -59,10 +60,25 @@ trait FakesMollie
         return PaymentId::fromString(PaymentId::PREFIX . Str::random(random_int(4, 16)));
     }
 
+    protected function refundId(): RefundId
+    {
+        return RefundId::fromString(RefundId::PREFIX . Str::random(random_int(4, 16)));
+    }
+
     protected function randomPaymentStatusExcept(string $excludeStatus = ''): string
     {
         $statuses = array_filter(
             FakeMollieWebhookCall::PAYMENT_STATUSES,
+            fn (string $status) => $status !== $excludeStatus,
+        );
+
+        return Arr::random($statuses);
+    }
+
+    protected function randomRefundStatusExcept(string $excludeStatus = ''): string
+    {
+        $statuses = array_filter(
+            FakeMollieWebhookCall::REFUND_STATUSES,
             fn (string $status) => $status !== $excludeStatus,
         );
 
