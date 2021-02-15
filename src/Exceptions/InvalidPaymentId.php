@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Exceptions;
 
-use Craftzing\Laravel\MollieWebhooks\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Exception;
 
 use function sprintf;

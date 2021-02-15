@@ -6,5 +6,5 @@ namespace Craftzing\Laravel\MollieWebhooks\Events;
 
 final class MolliePaymentStatusChangedToFailed
 {
-    use ExposesPaymentStatus;
+    use ExposesPaymentId;
 }

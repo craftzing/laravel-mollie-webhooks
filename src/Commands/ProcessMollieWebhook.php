@@ -7,7 +7,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Commands;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidPaymentId;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\UnexpectedWebhookPayload;
-use Craftzing\Laravel\MollieWebhooks\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Illuminate\Contracts\Events\Dispatcher;
 use Spatie\WebhookClient\ProcessWebhookJob;
 

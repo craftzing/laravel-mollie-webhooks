@@ -8,7 +8,6 @@ use Craftzing\Laravel\MollieWebhooks\Exceptions\FakeExceptionHandler;
 use Craftzing\Laravel\MollieWebhooks\MollieWebhooksServiceProvider;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesEvents;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
-use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeConfig;
 use CreateWebhookCallsTable;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
@@ -20,8 +19,6 @@ abstract class IntegrationTestCase extends OrchestraTestCase
 {
     use FakesEvents;
     use FakesMollie;
-
-    protected bool $shouldFakeConfig = true;
 
     public function setUp(): void
     {
@@ -55,10 +52,6 @@ abstract class IntegrationTestCase extends OrchestraTestCase
 
         if ($this->shouldFakeEvents) {
             $this->fakeEvents();
-        }
-
-        if ($this->shouldFakeConfig) {
-            FakeConfig::swap($this->app);
         }
 
         return parent::setUpTraits();
