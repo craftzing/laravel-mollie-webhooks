@@ -48,7 +48,10 @@ abstract class IntegrationTestCase extends OrchestraTestCase
         Bus::fake();
         Queue::fake();
         FakeExceptionHandler::swap($this->app);
-        $this->fakeMollie();
+
+        if ($this->shouldFakeMollie) {
+            $this->fakeMollie();
+        }
 
         if ($this->shouldFakeEvents) {
             $this->fakeEvents();

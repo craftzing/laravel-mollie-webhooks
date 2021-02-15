@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
-use Illuminate\Support\Arr;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\PaymentProphecy;
 use Mollie\Api\Endpoints\PaymentEndpoint;
 use Mollie\Api\Resources\Payment;
 
@@ -14,20 +14,18 @@ final class FakePaymentsEndpoint extends PaymentEndpoint
     use FakesMollie;
 
     /**
-     * @var \Mollie\Api\Resources\Payment[]
+     * @var \Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\PaymentProphecy[]
      */
-    private array $payments = [];
+    private array $paymentProphecies = [];
 
     /**
      * {@inheritdoc}
      */
-    public function fakePaymentWithStatus(string $status): Payment
+    public function fakePayment(): PaymentProphecy
     {
         $payment = new Payment($this->client);
-        $payment->id = $this->paymentId()->value();
-        $payment->status = $status;
 
-        return $this->payments[] = $payment;
+        return $this->paymentProphecies[] = new PaymentProphecy($payment);
     }
 
     /**
@@ -35,6 +33,10 @@ final class FakePaymentsEndpoint extends PaymentEndpoint
      */
     public function get($paymentId, array $parameters = []): Payment
     {
-        return Arr::first($this->payments, fn (Payment $payment) => $payment->id === $paymentId);
+        foreach ($this->paymentProphecies as $prophecy) {
+            if ($prophecy->payment->id === $paymentId) {
+                return $prophecy->payment;
+            }
+        }
     }
 }

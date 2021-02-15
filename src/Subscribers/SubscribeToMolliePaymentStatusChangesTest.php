@@ -178,7 +178,9 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
 
     private function webhookCallIndicatingPaymentStatusChangedTo(string $paymentStatus): WebhookCall
     {
-        $payment = $this->fakeMolliePayments->fakePaymentWithStatus($paymentStatus);
+        $payment = $this->fakeMolliePayments->fakePayment()
+            ->withStatus($paymentStatus)
+            ->payment;
 
         return FakeMollieWebhookCall::new()
             ->forResourceId(PaymentId::fromString($payment->id))

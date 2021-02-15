@@ -22,6 +22,14 @@ trait FakesMollie
 {
     protected FakePaymentsEndpoint $fakeMolliePayments;
 
+    /**
+     * @internal
+     *
+     * This option should only be disabled when you need to fetch real data from the Mollie
+     * API when writing test-cases. Don't disable it within the test suite itself.
+     */
+    protected bool $shouldFakeMollie = true;
+
     protected function setupMollieEnv(Application $app): void
     {
         $app['config']->set('mollie.key', env('MOLLIE_KEY'));
