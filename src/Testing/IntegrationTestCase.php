@@ -21,8 +21,6 @@ abstract class IntegrationTestCase extends OrchestraTestCase
     use FakesEvents;
     use FakesMollie;
 
-    protected bool $shouldFakeConfig = true;
-
     public function setUp(): void
     {
         parent::setUp();
@@ -55,10 +53,6 @@ abstract class IntegrationTestCase extends OrchestraTestCase
 
         if ($this->shouldFakeEvents) {
             $this->fakeEvents();
-        }
-
-        if ($this->shouldFakeConfig) {
-            FakeConfig::swap($this->app);
         }
 
         return parent::setUpTraits();

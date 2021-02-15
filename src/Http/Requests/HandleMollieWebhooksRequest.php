@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Http\Requests;
 
 use Craftzing\Laravel\MollieWebhooks\Commands\ProcessMollieWebhook;
-use Craftzing\Laravel\MollieWebhooks\Config;
 use Craftzing\Laravel\MollieWebhooks\Http\MollieSignatureValidator;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -17,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class HandleMollieWebhooksRequest extends Controller
 {
-    public function __invoke(Request $request, Config $config): Response
+    public function __invoke(Request $request): Response
     {
         $webhookConfig = new WebhookConfig([
             'name' => MollieSignatureValidator::NAME,
