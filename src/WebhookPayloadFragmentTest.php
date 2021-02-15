@@ -31,5 +31,42 @@ final class WebhookPayloadFragmentTest extends TestCase
 
         $this->assertCount(count($keys), $payloadFragment->keys());
         $this->assertSame($keys, $payloadFragment->keys());
+        $this->assertEmpty($payloadFragment->values());
+    }
+
+    public function values(): Generator
+    {
+        yield 'No values' => [
+            [],
+        ];
+
+        yield 'Single value' => [
+            ['foo'],
+        ];
+
+        yield 'List of values' => [
+            ['foo', 'bar', 'baz'],
+        ];
+
+        yield 'Associative list of values' => [
+            [
+                'foo' => 'bar',
+            ],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider values
+     */
+    public function itCanBeConstructedFromValues(array $values): void
+    {
+        $values = array_filter($values);
+
+        $payloadFragment = WebhookPayloadFragment::fromValues($values);
+
+        $this->assertCount(count($values), $payloadFragment->values());
+        $this->assertSame($values, $payloadFragment->values());
+        $this->assertEmpty($payloadFragment->keys());
     }
 }
