@@ -8,7 +8,6 @@ use Craftzing\Laravel\MollieWebhooks\Exceptions\FakeExceptionHandler;
 use Craftzing\Laravel\MollieWebhooks\MollieWebhooksServiceProvider;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesEvents;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
-use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeConfig;
 use CreateWebhookCallsTable;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
