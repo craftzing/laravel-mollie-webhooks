@@ -39,25 +39,25 @@ final class SubscribeToMolliePaymentStatusChanges implements ShouldQueue
         }
 
         if ($payment->status === PaymentStatus::STATUS_PAID) {
-            $this->events->dispatch(new MolliePaymentStatusChangedToPaid($paymentId, $payment->status));
+            $this->events->dispatch(new MolliePaymentStatusChangedToPaid($paymentId));
 
             return;
         }
 
         if ($payment->status === PaymentStatus::STATUS_EXPIRED) {
-            $this->events->dispatch(new MolliePaymentStatusChangedToExpired($paymentId, $payment->status));
+            $this->events->dispatch(new MolliePaymentStatusChangedToExpired($paymentId));
 
             return;
         }
 
         if ($payment->status === PaymentStatus::STATUS_FAILED) {
-            $this->events->dispatch(new MolliePaymentStatusChangedToFailed($paymentId, $payment->status));
+            $this->events->dispatch(new MolliePaymentStatusChangedToFailed($paymentId));
 
             return;
         }
 
         if ($payment->status === PaymentStatus::STATUS_CANCELED) {
-            $this->events->dispatch(new MolliePaymentStatusChangedToCanceled($paymentId, $payment->status));
+            $this->events->dispatch(new MolliePaymentStatusChangedToCanceled($paymentId));
 
             return;
         }

@@ -6,21 +6,15 @@ namespace Craftzing\Laravel\MollieWebhooks\Events;
 
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 
-trait ExposesPaymentStatus
+trait ExposesPaymentId
 {
     /**
      * @readonly
      */
     public PaymentId $paymentId;
 
-    /**
-     * @readonly
-     */
-    public string $status;
-
-    public function __construct(PaymentId $paymentId, string $status)
+    public function __construct(PaymentId $paymentId)
     {
         $this->paymentId = $paymentId;
-        $this->status = $status;
     }
 }

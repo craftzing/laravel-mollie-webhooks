@@ -88,9 +88,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         } else {
             Event::assertDispatched(
                 MolliePaymentStatusChangedToPaid::class,
-                new TruthTest(function (MolliePaymentStatusChangedToPaid $event) use ($paymentId, $paid): void {
+                new TruthTest(function (MolliePaymentStatusChangedToPaid $event) use ($paymentId): void {
                     $this->assertSame($paymentId, $event->paymentId);
-                    $this->assertSame($paid, $event->status);
                 }),
             );
         }
@@ -116,9 +115,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         } else {
             Event::assertDispatched(
                 MolliePaymentStatusChangedToExpired::class,
-                new TruthTest(function (MolliePaymentStatusChangedToExpired $event) use ($paymentId, $expired): void {
+                new TruthTest(function (MolliePaymentStatusChangedToExpired $event) use ($paymentId): void {
                     $this->assertSame($paymentId, $event->paymentId);
-                    $this->assertSame($expired, $event->status);
                 }),
             );
         }
@@ -144,9 +142,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         } else {
             Event::assertDispatched(
                 MolliePaymentStatusChangedToFailed::class,
-                new TruthTest(function (MolliePaymentStatusChangedToFailed $event) use ($paymentId, $failed): void {
+                new TruthTest(function (MolliePaymentStatusChangedToFailed $event) use ($paymentId): void {
                     $this->assertSame($paymentId, $event->paymentId);
-                    $this->assertSame($failed, $event->status);
                 }),
             );
         }
@@ -172,9 +169,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         } else {
             Event::assertDispatched(
                 MolliePaymentStatusChangedToCanceled::class,
-                new TruthTest(function (MolliePaymentStatusChangedToCanceled $event) use ($paymentId, $canceled): void {
+                new TruthTest(function (MolliePaymentStatusChangedToCanceled $event) use ($paymentId): void {
                     $this->assertSame($paymentId, $event->paymentId);
-                    $this->assertSame($canceled, $event->status);
                 }),
             );
         }
