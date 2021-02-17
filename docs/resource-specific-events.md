@@ -30,6 +30,15 @@ payment status. It does so cleverly by only dispatching the event when the statu
 latest known status in your system. For an in-depth dive into when we fire which event, have a look at the 
 [Updated Payment EPC](#updated-payment-epc).
 
+> 💡 Mollie only calls the webhook when a payment reaches one of the following statuses:
+> - `paid`
+> - `expired`
+> - `failed`
+> - `canceled`
+> 
+> This means we emit specific payment status change events for these statuses only. We do not emit events for `open`,
+> `pending` or `authorized`.
+
 ### Subscribing to Payment Refunds
 
 To use this subscriber, you can register it in your app's `EventServiceProvider`:
@@ -44,6 +53,9 @@ gets dispatched. It fetches the payment resource from the Mollie API, loops thro
 dispatches a `Craftzing\Laravel\MollieWebhooks\Events\MollieRefundWasTransferred` event for each transferred refund. It 
 does so cleverly by only dispatching the event when the refund status is not `refunded` in your system. For an in-depth 
 dive into when we fire which event, have a look at the [Updated Payment EPC](#updated-payment-epc).
+
+> 💡 Mollie only calls the webhook when a refund associated with the payment reaches the `refunded` status. For that 
+> reason, we only emit payment refund events for that exact status.
 
 ### Updated payment EPC
 
