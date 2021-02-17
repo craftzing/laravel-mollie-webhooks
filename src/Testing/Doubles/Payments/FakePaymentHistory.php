@@ -12,6 +12,7 @@ use Spatie\WebhookClient\Models\WebhookCall;
 final class FakePaymentHistory implements PaymentHistory
 {
     private ?string $latestStatus = null;
+    private bool $hasTransferredRefundForPayment = false;
 
     public function hasLatestStatusForPayment(
         PaymentId $paymentId,
@@ -31,6 +32,11 @@ final class FakePaymentHistory implements PaymentHistory
         RefundId $refundId,
         WebhookCall $ongoingWebhookCall
     ): bool {
-        // TODO: Implement hasRefundForPayment() method.
+        return $this->hasTransferredRefundForPayment;
+    }
+
+    public function fakeHasTransferredRefundForPayment(): void
+    {
+        $this->hasTransferredRefundForPayment = true;
     }
 }

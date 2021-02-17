@@ -8,10 +8,21 @@ use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Contracts\Container\Container;
 use Mollie\Api\Resources\Payment;
+use Mollie\Api\Types\PaymentStatus;
 
 final class FakePayment extends Payment
 {
     use FakesMollie;
+
+    public const STATUSES = [
+        PaymentStatus::STATUS_OPEN,
+        PaymentStatus::STATUS_PENDING,
+        PaymentStatus::STATUS_AUTHORIZED,
+        PaymentStatus::STATUS_PAID,
+        PaymentStatus::STATUS_EXPIRED,
+        PaymentStatus::STATUS_FAILED,
+        PaymentStatus::STATUS_CANCELED,
+    ];
 
     private Container $container;
 

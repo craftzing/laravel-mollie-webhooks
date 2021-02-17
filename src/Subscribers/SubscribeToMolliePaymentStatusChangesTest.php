@@ -58,7 +58,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
             fn () => null,
         ];
 
-        foreach (FakeMollieWebhookCall::PAYMENT_STATUSES as $paymentStatus) {
+        foreach (FakePayment::STATUSES as $paymentStatus) {
             yield "Payment history has `$paymentStatus` as the latest status for the payment" => [
                 function (FakePaymentHistory $fakePaymentHistory) use ($paymentStatus): string {
                     $fakePaymentHistory->fakeLatestStatus($paymentStatus);

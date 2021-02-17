@@ -27,24 +27,44 @@ protected $subscribe = [
 When registered, this subscriber will fire whenever `Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated` 
 gets dispatched. It fetches the payment resource from the Mollie API and dispatches a more specific event based on the 
 payment status. It does so cleverly by only dispatching the event when the status actually changed compared to the 
-latest known status in your system:
+latest known status in your system. For an in-depth dive into when we fire which event, have a look at the 
+[Updated Payment EPC](#updated-payment-epc).
+
+### Subscribing to Payment Refunds
+
+To use this subscriber, you can register it in your app's `EventServiceProvider`:
+```php
+protected $subscribe = [
+    \Craftzing\Laravel\MollieWebhooks\Subscribers\SubscribeToMolliePaymentRefunds::class,
+];
+```
+
+When registered, this subscriber will fire whenever `Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated`
+gets dispatched. It fetches the payment resource from the Mollie API, loops through all refunds associated with it and
+dispatches a `Craftzing\Laravel\MollieWebhooks\Events\MollieRefundWasTransferred` event for each transferred refund. It 
+does so cleverly by only dispatching the event when the refund status is not `refunded` in your system. For an in-depth 
+dive into when we fire which event, have a look at the [Updated Payment EPC](#updated-payment-epc).
+
+### Updated payment EPC
+
 ![Updated Payment EPC](/art/updated-payment-epc.png)
 
-#### Payment history
+### Payment history
 
-In order to determine if a payment status has changed, the subscriber uses a `PaymentHistory`.
+In order to compare fresh data retrieved from the Mollie API with data in your app, the subscriber uses a
+`PaymentHistory`.
 
 This package comes with a `Craftzing\Laravel\MollieWebhooks\Payments\WebhookCallPaymentHistory` implementation out of 
 the box. This implementation does 2 things:
-1. It compares the freshly retrieved payment status with the latest one that could be found in a previous webhook call 
-   for that same payment.
-2. It appends the freshly retrieved payment status to the payload of the ongoing webhook call whenever it differs from 
-   the last known status.
+1. It compares the freshly retrieved data with the latest data that could be found in a previous webhook call 
+   for that same resource.
+2. It appends the freshly retrieved data to the payload of the ongoing webhook call whenever it differs from 
+   the latest data in the webhook call history.
 
-If your application keeps track of the payment status (for example by saving it to one of your database resources), you
-may want to use your own implementation to compare the freshly retrieved status with the latest known status in your 
-system. You can do so by creating your own implementation of `Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory`
-and rebinding it to the interface in the Laravel IoC container in one of your service providers:
+If your application keeps track of Mollie data (for example by saving it to one of your database resources), you may 
+want to use your own implementation instead of relying on the webhook call history. You can do so by creating your own 
+implementation of `Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory` and rebinding it to the interface in the 
+Laravel IoC container in one of your service providers:
 ```php
 use App\Payments\YourPaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
@@ -58,3 +78,8 @@ final class AppServiceProvider extends ServiceProvider
     }
 }
 ```
+
+> 💡 While the `WebhookCallPaymentHistory` implementation actually writes the updated data to the `webhook_calls` 
+> database table right away (as we need that data available immediately), we highly recommend keeping your custom 
+> `PaymentHistory` implementations read-only. You should update the data in your system by registering listeners for 
+> the resource specific events.

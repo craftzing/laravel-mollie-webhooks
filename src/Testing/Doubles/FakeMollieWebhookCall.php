@@ -22,24 +22,6 @@ final class FakeMollieWebhookCall
 
     public const TABLE = 'webhook_calls';
 
-    public const PAYMENT_STATUSES = [
-        PaymentStatus::STATUS_OPEN,
-        PaymentStatus::STATUS_PENDING,
-        PaymentStatus::STATUS_AUTHORIZED,
-        PaymentStatus::STATUS_PAID,
-        PaymentStatus::STATUS_EXPIRED,
-        PaymentStatus::STATUS_FAILED,
-        PaymentStatus::STATUS_CANCELED,
-    ];
-
-    public const REFUND_STATUSES = [
-        RefundStatus::STATUS_QUEUED,
-        RefundStatus::STATUS_PENDING,
-        RefundStatus::STATUS_PROCESSING,
-        RefundStatus::STATUS_REFUNDED,
-        RefundStatus::STATUS_FAILED,
-    ];
-
     /**
      * @var mixed
      */
@@ -63,7 +45,7 @@ final class FakeMollieWebhookCall
     public function withStatusInPayload(string $status = ''): self
     {
         if (! $status) {
-            $status = Arr::random(self::PAYMENT_STATUSES);
+            $status = Arr::random(FakePayment::STATUSES);
         }
 
         return $this->appendToPayload(compact('status'));
