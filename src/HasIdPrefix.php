@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks;
 
-abstract class PrefixedResourceId implements ResourceId
+trait HasIdPrefix
 {
     private string $value;
 
@@ -14,7 +14,7 @@ abstract class PrefixedResourceId implements ResourceId
         $this->value = $value;
     }
 
-    abstract protected function failWhenPrefixIsInvalid(string $value);
+    abstract protected function failWhenPrefixIsInvalid(string $value): void;
 
     /**
      * @return static
