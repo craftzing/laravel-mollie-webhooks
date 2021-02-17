@@ -8,7 +8,6 @@ use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Support\Arr;
-use Mollie\Api\Types\PaymentStatus;
 use Mollie\Api\Types\RefundStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 

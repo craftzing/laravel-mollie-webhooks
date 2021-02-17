@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks;
 
-use function array_keys;
-use function array_merge;
 use function tap;
 
 final class WebhookPayloadFragment

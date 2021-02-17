@@ -12,7 +12,7 @@ final class RefundId extends PrefixedResourceId
 {
     public const PREFIX = 're_';
 
-    protected function failWhenPrefixIsInvalid(string $value)
+    protected function failWhenPrefixIsInvalid(string $value): void
     {
         if (! Str::startsWith($value, self::PREFIX)) {
             throw InvalidRefundId::missingExpectedPrefix($value);

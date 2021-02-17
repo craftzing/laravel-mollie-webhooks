@@ -12,7 +12,7 @@ final class PaymentId extends PrefixedResourceId
 {
     public const PREFIX = 'tr_';
 
-    protected function failWhenPrefixIsInvalid(string $value)
+    protected function failWhenPrefixIsInvalid(string $value): void
     {
         if (! Str::startsWith($value, self::PREFIX)) {
             throw InvalidPaymentId::missingExpectedPrefix($value);

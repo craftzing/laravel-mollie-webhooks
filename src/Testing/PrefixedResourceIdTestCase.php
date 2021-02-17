@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Testing;
 
-use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidResourceId;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Generator;
 use Illuminate\Support\Str;
@@ -19,7 +18,9 @@ abstract class PrefixedResourceIdTestCase extends TestCase
     private const EXPECTED_PREFIX = 're_';
 
     abstract protected function resourceIdClass(): string;
+
     abstract protected function expectedPrefix(): string;
+
     abstract protected function expectedExceptionClass(): string;
 
     public function invalidMollieResourceIds(): Generator
