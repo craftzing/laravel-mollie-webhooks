@@ -66,7 +66,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
      */
     public function itCanCheckIfItHasALatestStatusForAPayment(callable $resolveExpectedResult): void
     {
-        $paymentId = $this->paymentId();
+        $paymentId = $this->generatePaymentId();
         $status = $this->randomPaymentStatusExcept();
         $expectedToHaveSameLatestStatus = $resolveExpectedResult($paymentId, $status);
         $webhookCall = FakeMollieWebhookCall::new()
@@ -148,8 +148,8 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
      */
     public function itCanCheckIfItHasATransferredRefundForAPayment(callable $resolveExpectedResult): void
     {
-        $paymentId = $this->paymentId();
-        $refundId = $this->refundId();
+        $paymentId = $this->generatePaymentId();
+        $refundId = $this->generateRefundId();
         $expectedToHaveTransferredRefund = $resolveExpectedResult($paymentId, $refundId);
         $webhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($paymentId)

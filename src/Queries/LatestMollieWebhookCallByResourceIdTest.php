@@ -39,7 +39,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
      */
     public function itCanHandleNoResults(callable $addWebhookCallHistory): void
     {
-        $resourceId = $this->paymentId();
+        $resourceId = $this->generatePaymentId();
         $addWebhookCallHistory($resourceId);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
@@ -55,7 +55,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
      */
     public function itCanFindTheLatestMollieWebhookCallByResourceId(): void
     {
-        $resourceId = $this->paymentId();
+        $resourceId = $this->generatePaymentId();
         $latestWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
             ->withStatusInPayload()
@@ -103,7 +103,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
      */
     public function itCanBeFilteredByPayloadFragmentKeys(callable $resolveExpectedWebhookCallFromHistory): void
     {
-        $resourceId = $this->paymentId();
+        $resourceId = $this->generatePaymentId();
         $expectedWebhookCall = $resolveExpectedWebhookCallFromHistory($resourceId);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
@@ -125,7 +125,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
      */
     public function itCanBeFilteredByAPayloadFragmentValues(callable $resolveExpectedWebhookCallFromHistory): void
     {
-        $resourceId = $this->paymentId();
+        $resourceId = $this->generatePaymentId();
         $expectedWebhookCall = $resolveExpectedWebhookCallFromHistory($resourceId);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)

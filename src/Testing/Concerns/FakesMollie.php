@@ -21,11 +21,7 @@ use function random_int;
 
 trait FakesMollie
 {
-    protected FakePaymentsEndpoint $fakeMolliePayments;
-
     /**
-     * @internal
-     *
      * This option should only be disabled when you need to fetch real data from the Mollie
      * API when writing test-cases. Don't disable it within the test suite itself.
      */
@@ -37,17 +33,14 @@ trait FakesMollie
     }
 
     /**
-     * @internal
-     *
      * Chances are we may want to look for a different solution to fake the mollie SDK at some point (as we preferably
      * wouldn't have fake implementations we don't own ourselves). But for now, this seems to be the simplest approach.
      */
     protected function fakeMollie(): void
     {
         $this->app['config']->set('mollie.key', 'test_fakeMollieKeyContainingAtLeast30Characters');
-        $client = new FakeMollieApiClient();
-        $this->fakeMolliePayments = new FakePaymentsEndpoint($client);
-        $client->payments = $this->fakeMolliePayments;
+        $client = FakeMollieApiClient::fake($this->app);
+        $client->payments = FakePaymentsEndpoint::fake($this->app);
 
         $this->swap(
             MollieApiWrapper::class,
@@ -55,12 +48,12 @@ trait FakesMollie
         );
     }
 
-    protected function paymentId(): PaymentId
+    protected function generatePaymentId(): PaymentId
     {
         return PaymentId::fromString(PaymentId::PREFIX . Str::random(random_int(4, 16)));
     }
 
-    protected function refundId(): RefundId
+    protected function generateRefundId(): RefundId
     {
         return RefundId::fromString(RefundId::PREFIX . Str::random(random_int(4, 16)));
     }

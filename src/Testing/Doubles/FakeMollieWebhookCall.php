@@ -47,7 +47,7 @@ final class FakeMollieWebhookCall
 
     private function __construct()
     {
-        $this->payload = ['id' => $this->paymentId()->value()];
+        $this->payload = ['id' => $this->generatePaymentId()->value()];
     }
 
     public static function new(): self
@@ -72,7 +72,7 @@ final class FakeMollieWebhookCall
     public function withRefundInPayload(?RefundId $refundId = null, string $status = ''): self
     {
         if (! $refundId) {
-            $refundId = $this->refundId();
+            $refundId = $this->generateRefundId();
         }
 
         if (! $status) {
