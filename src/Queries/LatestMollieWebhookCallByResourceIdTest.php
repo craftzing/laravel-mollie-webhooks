@@ -74,6 +74,29 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertTrue($result->is($latestWebhookCall));
     }
 
+    /**
+     * @test
+     */
+    public function itIgnoresFailedWebhookCalls(): void
+    {
+        $resourceId = $this->generatePaymentId();
+        $latestWebhookCall = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
+            ->create(['created_at' => 'yesterday 09:00']);
+        $failedWebhookCall = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
+            ->failed()
+            ->create(['created_at' => 'yesterday 09:30']);
+        $ignoreWebhookCall = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
+            ->create();
+
+        $result = $this->app[LatestMollieWebhookCallByResourceId::class]->find($resourceId, $ignoreWebhookCall);
+
+        $this->assertInstanceOf(WebhookCall::class, $result);
+        $this->assertTrue($result->is($latestWebhookCall));
+    }
+
     public function webhookCallByFragment(): Generator
     {
         yield 'Webhook call history with multiple scenarios' => [
