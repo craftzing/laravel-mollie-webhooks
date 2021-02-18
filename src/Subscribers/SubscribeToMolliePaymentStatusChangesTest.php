@@ -12,6 +12,7 @@ use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\FakePaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
@@ -44,7 +45,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         $this->dontFakeEvents();
 
         Event::subscribe(SubscribeToMolliePaymentStatusChanges::class);
-        Event::dispatch(new MolliePaymentWasUpdated($this->paymentId(), new WebhookCall()));
+        Event::dispatch(new MolliePaymentWasUpdated($this->generatePaymentId(), new WebhookCall()));
 
         Queue::assertPushed(CallQueuedListener::class, function (CallQueuedListener $listener): bool {
             return $listener->class === SubscribeToMolliePaymentStatusChanges::class;
@@ -57,7 +58,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
             fn () => null,
         ];
 
-        foreach (FakeMollieWebhookCall::PAYMENT_STATUSES as $paymentStatus) {
+        foreach (FakePayment::STATUSES as $paymentStatus) {
             yield "Payment history has `$paymentStatus` as the latest status for the payment" => [
                 function (FakePaymentHistory $fakePaymentHistory) use ($paymentStatus): string {
                     $fakePaymentHistory->fakeLatestStatus($paymentStatus);
@@ -176,12 +177,12 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         }
     }
 
-    private function webhookCallIndicatingPaymentStatusChangedTo(string $paymentStatus): WebhookCall
+    private function webhookCallIndicatingPaymentStatusChangedTo(string $status): WebhookCall
     {
-        $payment = $this->fakeMolliePayments->fakePaymentWithStatus($paymentStatus);
+        $payment = FakePayment::fake($this->app)->withStatus($status);
 
         return FakeMollieWebhookCall::new()
-            ->forResourceId(PaymentId::fromString($payment->id))
+            ->forResourceId($payment->id())
             ->create();
     }
 }

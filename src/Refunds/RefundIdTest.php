@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Craftzing\Laravel\MollieWebhooks\Payments;
+namespace Craftzing\Laravel\MollieWebhooks\Refunds;
 
-use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidPaymentId;
+use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidRefundId;
 use Craftzing\Laravel\MollieWebhooks\Testing\PrefixedResourceIdTestCase;
 
-final class PaymentIdTest extends PrefixedResourceIdTestCase
+final class RefundIdTest extends PrefixedResourceIdTestCase
 {
     protected function resourceIdClass(): string
     {
-        return PaymentId::class;
+        return RefundId::class;
     }
 
     protected function expectedPrefix(): string
     {
-        return 'tr_';
+        return 're_';
     }
 
     protected function expectedExceptionClass(): string
     {
-        return InvalidPaymentId::class;
+        return InvalidRefundId::class;
     }
 }

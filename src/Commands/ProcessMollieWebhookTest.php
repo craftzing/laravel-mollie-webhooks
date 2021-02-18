@@ -59,7 +59,7 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
      */
     public function itCanHandleIncomingWebhooks(): void
     {
-        $paymentId = $this->paymentId();
+        $paymentId = $this->generatePaymentId();
         $webhookCall = new WebhookCall([
             'payload' => [
                 'id' => $paymentId->value(),

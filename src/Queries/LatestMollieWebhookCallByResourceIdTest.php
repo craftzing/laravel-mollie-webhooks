@@ -39,7 +39,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
      */
     public function itCanHandleNoResults(callable $addWebhookCallHistory): void
     {
-        $resourceId = $this->paymentId();
+        $resourceId = $this->generatePaymentId();
         $addWebhookCallHistory($resourceId);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
@@ -55,7 +55,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
      */
     public function itCanFindTheLatestMollieWebhookCallByResourceId(): void
     {
-        $resourceId = $this->paymentId();
+        $resourceId = $this->generatePaymentId();
         $latestWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
             ->withStatusInPayload()
@@ -74,25 +74,37 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertTrue($result->is($latestWebhookCall));
     }
 
+    public function webhookCallByFragment(): Generator
+    {
+        yield 'Webhook call history with multiple scenarios' => [
+            function (ResourceId $resourceId): WebhookCall {
+                $webhookCallWithOnlyStatusInPayload = FakeMollieWebhookCall::new()
+                    ->forResourceId($resourceId)
+                    ->withStatusInPayload()
+                    ->create();
+                $webhookCallWithFragmentInPayload = FakeMollieWebhookCall::new()
+                    ->forResourceId($resourceId)
+                    ->withStatusInPayload()
+                    ->appendToPayload(['foo' => 'bar'])
+                    ->create();
+                $webhookCallWithoutFragmentInPayload = FakeMollieWebhookCall::new()
+                    ->forResourceId($resourceId)
+                    ->appendToPayload(['bar' => 'foo'])
+                    ->create();
+
+                return $webhookCallWithFragmentInPayload;
+            },
+        ];
+    }
+
     /**
      * @test
+     * @dataProvider webhookCallByFragment
      */
-    public function itCanBeFilteredByAPayloadFragment(): void
+    public function itCanBeFilteredByPayloadFragmentKeys(callable $resolveExpectedWebhookCallFromHistory): void
     {
-        $resourceId = $this->paymentId();
-        $webhookCallWithOnlyStatusInPayload = FakeMollieWebhookCall::new()
-            ->forResourceId($resourceId)
-            ->withStatusInPayload()
-            ->create();
-        $webhookCallWithFragmentInPayload = FakeMollieWebhookCall::new()
-            ->forResourceId($resourceId)
-            ->withStatusInPayload()
-            ->appendToPayload(['foo' => 'bar'])
-            ->create();
-        $webhookCallWithoutFragmentInPayload = FakeMollieWebhookCall::new()
-            ->forResourceId($resourceId)
-            ->appendToPayload(['bar' => 'foo'])
-            ->create();
+        $resourceId = $this->generatePaymentId();
+        $expectedWebhookCall = $resolveExpectedWebhookCallFromHistory($resourceId);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
             ->create();
@@ -104,6 +116,28 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         );
 
         $this->assertInstanceOf(WebhookCall::class, $result);
-        $this->assertTrue($result->is($webhookCallWithFragmentInPayload));
+        $this->assertTrue($result->is($expectedWebhookCall));
+    }
+
+    /**
+     * @test
+     * @dataProvider webhookCallByFragment
+     */
+    public function itCanBeFilteredByAPayloadFragmentValues(callable $resolveExpectedWebhookCallFromHistory): void
+    {
+        $resourceId = $this->generatePaymentId();
+        $expectedWebhookCall = $resolveExpectedWebhookCallFromHistory($resourceId);
+        $ignoreWebhookCall = FakeMollieWebhookCall::new()
+            ->forResourceId($resourceId)
+            ->create();
+
+        $result = $this->app[LatestMollieWebhookCallByResourceId::class]->find(
+            $resourceId,
+            $ignoreWebhookCall,
+            WebhookPayloadFragment::fromValues(['foo' => 'bar']),
+        );
+
+        $this->assertInstanceOf(WebhookCall::class, $result);
+        $this->assertTrue($result->is($expectedWebhookCall));
     }
 }

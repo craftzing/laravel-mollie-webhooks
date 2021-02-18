@@ -33,5 +33,9 @@ final class LatestMollieWebhookCallByResourceId
         foreach ($payloadFragment->keys() as $key) {
             $query->where('payload', 'LIKE', "%\"{$key}\":%");
         }
+
+        foreach ($payloadFragment->values() as $key => $value) {
+            $query->where('payload', 'LIKE', "%\"{$key}\":\"{$value}\"%");
+        }
     }
 }

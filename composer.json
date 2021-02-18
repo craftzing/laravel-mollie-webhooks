@@ -36,7 +36,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Craftzing\\Laravel\\LokaliseWebhooks\\MollieWebhooksServiceProvider"
+                "Craftzing\\Laravel\\MollieWebhooks\\MollieWebhooksServiceProvider"
             ]
         }
     }

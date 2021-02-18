@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 
+use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Support\Arr;
-use Mollie\Api\Types\PaymentStatus;
+use Mollie\Api\Types\RefundStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 use function compact;
@@ -20,16 +21,6 @@ final class FakeMollieWebhookCall
 
     public const TABLE = 'webhook_calls';
 
-    public const PAYMENT_STATUSES = [
-        PaymentStatus::STATUS_OPEN,
-        PaymentStatus::STATUS_PENDING,
-        PaymentStatus::STATUS_AUTHORIZED,
-        PaymentStatus::STATUS_PAID,
-        PaymentStatus::STATUS_EXPIRED,
-        PaymentStatus::STATUS_FAILED,
-        PaymentStatus::STATUS_CANCELED,
-    ];
-
     /**
      * @var mixed
      */
@@ -37,7 +28,7 @@ final class FakeMollieWebhookCall
 
     private function __construct()
     {
-        $this->payload = ['id' => $this->paymentId()->value()];
+        $this->payload = ['id' => $this->generatePaymentId()->value()];
     }
 
     public static function new(): self
@@ -53,15 +44,36 @@ final class FakeMollieWebhookCall
     public function withStatusInPayload(string $status = ''): self
     {
         if (! $status) {
-            $status = Arr::random(self::PAYMENT_STATUSES);
+            $status = Arr::random(FakePayment::STATUSES);
         }
 
         return $this->appendToPayload(compact('status'));
     }
 
+    public function withRefundInPayload(?RefundId $refundId = null, string $status = ''): self
+    {
+        if (! $refundId) {
+            $refundId = $this->generateRefundId();
+        }
+
+        if (! $status) {
+            $status = RefundStatus::STATUS_REFUNDED;
+        }
+
+        return $this->appendToPayload([
+            'refund' => [
+                'id' => $refundId->value(),
+                'status' => $status,
+            ],
+        ]);
+    }
+
     public function appendToPayload(array $payload): self
     {
-        return tap(clone $this, fn (self $instance) => $instance->payload = $payload + $instance->payload);
+        return tap(
+            clone $this,
+            fn (self $instance) => $instance->payload = array_merge($payload, $instance->payload),
+        );
     }
 
     public function create(array $attributes = []): WebhookCall

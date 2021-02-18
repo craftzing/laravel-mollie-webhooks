@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks;
 
+use function tap;
+
 final class WebhookPayloadFragment
 {
     /**
@@ -11,14 +13,22 @@ final class WebhookPayloadFragment
      */
     private array $keys = [];
 
-    private function __construct(string ...$keys)
-    {
-        $this->keys = $keys;
-    }
+    /**
+     * @var array<string>
+     */
+    private array $values = [];
 
     public static function fromKeys(string ...$keys): self
     {
-        return new self(...$keys);
+        return tap(new self(), fn (self $instance) => $instance->keys = $keys);
+    }
+
+    /**
+     * @param array<mixed> $values
+     */
+    public static function fromValues(array $values): self
+    {
+        return tap(new self(), fn (self $instance) => $instance->values = $values);
     }
 
     /**
@@ -27,5 +37,13 @@ final class WebhookPayloadFragment
     public function keys(): array
     {
         return $this->keys;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function values(): array
+    {
+        return $this->values;
     }
 }
