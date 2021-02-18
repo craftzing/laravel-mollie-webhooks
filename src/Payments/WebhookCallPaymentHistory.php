@@ -30,7 +30,7 @@ final class WebhookCallPaymentHistory implements PaymentHistory
         $latestWebhookCall = $this->latestMollieWebhookCallByResourceId->find(
             $paymentId,
             $ongoingWebhookCall,
-            WebhookPayloadFragment::fromKeys('status'),
+            WebhookPayloadFragment::fromKeys('payment_status'),
         );
 
         // When we couldn't find a previous webhook call for the payment having a status in the payload, we should
@@ -38,19 +38,19 @@ final class WebhookCallPaymentHistory implements PaymentHistory
         // should persist the freshly retrieved status to the payload of the ongoing webhook call in
         // order to have it as the latest status for that payment for future webhook calls.
         if (! $latestWebhookCall) {
-            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, compact('status'));
+            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, ['payment_status' => $status]);
 
             return false;
         }
 
-        $latestPaymentStatusInHistory = $this->webhookPayload($latestWebhookCall)['status'] ?? null;
+        $latestPaymentStatusInHistory = $this->webhookPayload($latestWebhookCall)['payment_status'] ?? null;
 
         // When the latest status for the payment in the webhook call history does not match the freshly
         // retrieved status, we should assume that the ongoing webhook call was triggered due to a
         // payment status change. So once again, we should persist the freshly retrieved status
         // to the payload of the ongoing webhook call for future reference...
         if ($latestPaymentStatusInHistory !== $status) {
-            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, compact('status'));
+            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, ['payment_status' => $status]);
 
             return false;
         }
@@ -68,7 +68,7 @@ final class WebhookCallPaymentHistory implements PaymentHistory
     ): bool {
         $refund = [
             'id' => $refundId->value(),
-            'status' => RefundStatus::STATUS_REFUNDED,
+            'refund_status' => RefundStatus::STATUS_REFUNDED,
         ];
         $latestWebhookCall = $this->latestMollieWebhookCallByResourceId->find(
             $paymentId,

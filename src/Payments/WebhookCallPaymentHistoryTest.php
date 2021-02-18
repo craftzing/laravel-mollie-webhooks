@@ -11,7 +11,6 @@ use Generator;
 use Mollie\Api\Types\RefundStatus;
 
 use function array_merge;
-use function compact;
 use function json_encode;
 
 final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
@@ -58,6 +57,37 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
                 return true;
             },
         ];
+
+        yield 'Latest webhook call for the payment was due to a refund, but the latest status differs' => [
+            function (PaymentId $paymentId, string $status): bool {
+                $latestStatus = $this->randomPaymentStatusExcept($status);
+                $secondALastWebhookCall = FakeMollieWebhookCall::new()
+                    ->forResourceId($paymentId)
+                    ->withStatusInPayload($latestStatus)
+                    ->create();
+                $latestWebhookCall = FakeMollieWebhookCall::new()
+                    ->forResourceId($paymentId)
+                    ->withRefundInPayload()
+                    ->create();
+
+                return false;
+            },
+        ];
+
+        yield 'Latest webhook call for the payment was due to a refund, but the latest status is the same' => [
+            function (PaymentId $paymentId, string $status): bool {
+                $secondALastWebhookCall = FakeMollieWebhookCall::new()
+                    ->forResourceId($paymentId)
+                    ->withStatusInPayload($status)
+                    ->create();
+                $latestWebhookCall = FakeMollieWebhookCall::new()
+                    ->forResourceId($paymentId)
+                    ->withRefundInPayload()
+                    ->create();
+
+                return true;
+            },
+        ];
     }
 
     /**
@@ -87,7 +117,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
 
                 // Only when the PaymentHistory is not expected to have the same latest status, we should
                 // expect the freshly retrieved status to be persisted to the ongoing webhook call payload.
-                ! $expectedToHaveSameLatestStatus ? compact('status') : [],
+                ! $expectedToHaveSameLatestStatus ? ['payment_status' => $status] : [],
             )),
         ]);
     }
@@ -172,7 +202,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
                 ! $expectedToHaveTransferredRefund ? [
                     'refund' => [
                         'id' => $refundId->value(),
-                        'status' => RefundStatus::STATUS_REFUNDED,
+                        'refund_status' => RefundStatus::STATUS_REFUNDED,
                     ],
                 ] : [],
             )),
