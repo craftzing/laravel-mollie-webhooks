@@ -11,7 +11,6 @@ use Illuminate\Support\Arr;
 use Mollie\Api\Types\RefundStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-use function compact;
 use function factory;
 use function tap;
 
