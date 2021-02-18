@@ -54,7 +54,7 @@ final class FakeMollieWebhookCall
             $status = Arr::random(FakePayment::STATUSES);
         }
 
-        return $this->appendToPayload(compact('status'));
+        return $this->appendToPayload(['payment_status' => $status]);
     }
 
     public function withRefundInPayload(?RefundId $refundId = null, string $status = ''): self
@@ -70,7 +70,7 @@ final class FakeMollieWebhookCall
         return $this->appendToPayload([
             'refund' => [
                 'id' => $refundId->value(),
-                'status' => $status,
+                'refund_status' => $status,
             ],
         ]);
     }

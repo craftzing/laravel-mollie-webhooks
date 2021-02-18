@@ -135,7 +135,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $result = $this->app[LatestMollieWebhookCallByResourceId::class]->find(
             $resourceId,
             $ignoreWebhookCall,
-            WebhookPayloadFragment::fromKeys('status', 'foo'),
+            WebhookPayloadFragment::fromKeys('payment_status', 'foo'),
         );
 
         $this->assertInstanceOf(WebhookCall::class, $result);
