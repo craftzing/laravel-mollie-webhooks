@@ -23,6 +23,7 @@ final class LatestMollieWebhookCallByResourceId
             ->where('name', MollieSignatureValidator::NAME)
             ->where('payload', 'LIKE', "%\"id\":\"{$resourceId->value()}\"%")
             ->when($payloadFragment, Closure::fromCallable([$this, 'filterByPayloadFragment']))
+            ->where(Closure::fromCallable([$this, 'ignoreFailedWebhookCalls']))
             ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc')
             ->first();
@@ -37,5 +38,11 @@ final class LatestMollieWebhookCallByResourceId
         foreach ($payloadFragment->values() as $key => $value) {
             $query->where('payload', 'LIKE', "%\"{$key}\":\"{$value}\"%");
         }
+    }
+
+    private function ignoreFailedWebhookCalls(Builder $query): void
+    {
+        $query->whereNull('exception')
+            ->orWhere('exception', '');
     }
 }

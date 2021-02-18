@@ -26,6 +26,8 @@ final class FakeMollieWebhookCall
      */
     private array $payload = [];
 
+    private ?string $exception = null;
+
     private function __construct()
     {
         $this->payload = ['id' => $this->generatePaymentId()->value()];
@@ -39,6 +41,11 @@ final class FakeMollieWebhookCall
     public function forResourceId(ResourceId $resourceId): self
     {
         return tap(clone $this, fn (self $instance) => $instance->payload['id'] = $resourceId->value());
+    }
+
+    public function failed(): self
+    {
+        return tap(clone $this, fn (self $instance) => $instance->exception = 'Something went wrong');
     }
 
     public function withStatusInPayload(string $status = ''): self
@@ -78,6 +85,9 @@ final class FakeMollieWebhookCall
 
     public function create(array $attributes = []): WebhookCall
     {
-        return factory(WebhookCall::class)->create($attributes + ['payload' => $this->payload]);
+        return factory(WebhookCall::class)->create($attributes + [
+            'payload' => $this->payload,
+            'exception' => $this->exception,
+        ]);
     }
 }
