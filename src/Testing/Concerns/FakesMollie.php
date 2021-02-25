@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Concerns;
 
+use Craftzing\Laravel\MollieWebhooks\Orders\OrderId;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieApiClient;
@@ -47,6 +48,11 @@ trait FakesMollie
             MollieApiWrapper::class,
             new MollieApiWrapper($this->app[Repository::class], $client),
         );
+    }
+
+    protected function generateOrderId(): OrderId
+    {
+        return OrderId::fromString(OrderId::PREFIX . Str::random(random_int(4, 16)));
     }
 
     protected function generatePaymentId(): PaymentId
