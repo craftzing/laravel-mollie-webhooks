@@ -58,11 +58,11 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $resourceId = $this->generatePaymentId();
         $latestWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
-            ->withStatusInPayload()
+            ->withPaymentStatusInPayload()
             ->create(['created_at' => 'yesterday 09:00']);
         $olderWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
-            ->withStatusInPayload()
+            ->withPaymentStatusInPayload()
             ->create(['created_at' => '2 weeks ago 18:30']);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
@@ -103,11 +103,11 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
             function (ResourceId $resourceId): WebhookCall {
                 $webhookCallWithOnlyStatusInPayload = FakeMollieWebhookCall::new()
                     ->forResourceId($resourceId)
-                    ->withStatusInPayload()
+                    ->withPaymentStatusInPayload()
                     ->create();
                 $webhookCallWithFragmentInPayload = FakeMollieWebhookCall::new()
                     ->forResourceId($resourceId)
-                    ->withStatusInPayload()
+                    ->withPaymentStatusInPayload()
                     ->appendToPayload(['foo' => 'bar'])
                     ->create();
                 $webhookCallWithoutFragmentInPayload = FakeMollieWebhookCall::new()
