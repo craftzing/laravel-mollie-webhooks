@@ -73,7 +73,7 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
      * @test
      * @dataProvider webhookPayloads
      */
-    public function itCanHandleIncomingWebhooks(Callable $generatesResourceId, string $event): void
+    public function itCanHandleIncomingWebhooks(callable $generatesResourceId, string $event): void
     {
         $resourceId = $generatesResourceId();
         $webhookCall = new WebhookCall([

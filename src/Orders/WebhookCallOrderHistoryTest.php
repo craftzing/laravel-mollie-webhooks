@@ -18,7 +18,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
     public function orderWebhookCallHistory(): Generator
     {
         yield 'No webhook calls were made for the payment so far' => [
-            fn(): bool => false,
+            fn (): bool => false,
         ];
 
         yield 'Latest order status in the webhook call history differs from the one in the current webhook call' => [
@@ -117,7 +117,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 
                 // Only when the OrderHistory is not expected to have the same latest status, we should
                 // expect the freshly retrieved status to be persisted to the ongoing webhook call payload.
-                !$expectedToHaveSameLatestStatus ? ['order_status' => $status] : [],
+                ! $expectedToHaveSameLatestStatus ? ['order_status' => $status] : [],
             )),
         ]);
     }
@@ -125,7 +125,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
     public function refundsWebhookCallHistory(): Generator
     {
         yield 'No webhook calls were made for the order so far' => [
-            fn(): bool => false,
+            fn (): bool => false,
         ];
 
         yield 'Order has no refunds in the webhook call history' => [
@@ -199,7 +199,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 
                 // Only when the PaymentHistory is not expected to have the transferred refund, we should expect
                 // the freshly retrieved RefundId to be persisted to the ongoing webhook call payload.
-                !$expectedToHaveTransferredRefund ? [
+                ! $expectedToHaveTransferredRefund ? [
                     'refund' => [
                         'id' => $refundId->value(),
                         'refund_status' => RefundStatus::STATUS_REFUNDED,

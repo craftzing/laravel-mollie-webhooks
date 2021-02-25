@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Refunds;
 
-use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidResourceId;
 use Craftzing\Laravel\MollieWebhooks\HasIdPrefix;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
-use Illuminate\Support\Str;
 
 final class RefundId implements ResourceId
 {
