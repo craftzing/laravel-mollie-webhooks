@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Events;
 
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
+use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Illuminate\Queue\SerializesModels;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-final class MolliePaymentWasUpdated
+final class MolliePaymentWasUpdated implements MollieResourceStatusWasUpdated
 {
     use SerializesModels;
 
@@ -26,5 +27,15 @@ final class MolliePaymentWasUpdated
     {
         $this->paymentId = $paymentId;
         $this->webhookCall = $webhookCall;
+    }
+
+    public function resourceId(): ResourceId
+    {
+        return $this->paymentId;
+    }
+
+    public function webhookCall(): WebhookCall
+    {
+        return $this->webhookCall;
     }
 }
