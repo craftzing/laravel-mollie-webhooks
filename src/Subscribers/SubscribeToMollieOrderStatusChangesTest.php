@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToAuthorized;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToCanceled;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToExpired;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToPaid;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToAuthorized;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToCanceled;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToExpired;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToPaid;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderId;
@@ -85,11 +85,11 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         );
 
         if ($latestStatusInOrderHistory === $paid) {
-            Event::assertNotDispatched(MollieOrderStatusWasChangedToPaid::class);
+            Event::assertNotDispatched(MollieOrderStatusChangedToPaid::class);
         } else {
             Event::assertDispatched(
-                MollieOrderStatusWasChangedToPaid::class,
-                new TruthTest(function (MollieOrderStatusWasChangedToPaid $event) use ($orderId): void {
+                MollieOrderStatusChangedToPaid::class,
+                new TruthTest(function (MollieOrderStatusChangedToPaid $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );
@@ -112,11 +112,11 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         );
 
         if ($latestStatusInOrderHistory === $expired) {
-            Event::assertNotDispatched(MollieOrderStatusWasChangedToExpired::class);
+            Event::assertNotDispatched(MollieOrderStatusChangedToExpired::class);
         } else {
             Event::assertDispatched(
-                MollieOrderStatusWasChangedToExpired::class,
-                new TruthTest(function (MollieOrderStatusWasChangedToExpired $event) use ($orderId): void {
+                MollieOrderStatusChangedToExpired::class,
+                new TruthTest(function (MollieOrderStatusChangedToExpired $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );
@@ -139,11 +139,11 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         );
 
         if ($latestStatusInOrderHistory === $authorized) {
-            Event::assertNotDispatched(MollieOrderStatusWasChangedToAuthorized::class);
+            Event::assertNotDispatched(MollieOrderStatusChangedToAuthorized::class);
         } else {
             Event::assertDispatched(
-                MollieOrderStatusWasChangedToAuthorized::class,
-                new TruthTest(function (MollieOrderStatusWasChangedToAuthorized $event) use ($orderId): void {
+                MollieOrderStatusChangedToAuthorized::class,
+                new TruthTest(function (MollieOrderStatusChangedToAuthorized $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );
@@ -166,11 +166,11 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         );
 
         if ($latestStatusInOrderHistory === $canceled) {
-            Event::assertNotDispatched(MollieOrderStatusWasChangedToCanceled::class);
+            Event::assertNotDispatched(MollieOrderStatusChangedToCanceled::class);
         } else {
             Event::assertDispatched(
-                MollieOrderStatusWasChangedToCanceled::class,
-                new TruthTest(function (MollieOrderStatusWasChangedToCanceled $event) use ($orderId): void {
+                MollieOrderStatusChangedToCanceled::class,
+                new TruthTest(function (MollieOrderStatusChangedToCanceled $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToAuthorized;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToCanceled;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToCompleted;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToExpired;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusWasChangedToPaid;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToAuthorized;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToCanceled;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToCompleted;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToExpired;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderStatusChangedToPaid;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -40,31 +40,31 @@ final class SubscribeToMollieOrderStatusChanges implements ShouldQueue
         }
 
         if ($order->status === OrderStatus::STATUS_PAID) {
-            $this->events->dispatch(new MollieOrderStatusWasChangedToPaid($orderId));
+            $this->events->dispatch(new MollieOrderStatusChangedToPaid($orderId));
 
             return;
         }
 
         if ($order->status === OrderStatus::STATUS_AUTHORIZED) {
-            $this->events->dispatch(new MollieOrderStatusWasChangedToAuthorized($orderId));
+            $this->events->dispatch(new MollieOrderStatusChangedToAuthorized($orderId));
 
             return;
         }
 
         if ($order->status === OrderStatus::STATUS_COMPLETED) {
-            $this->events->dispatch(new MollieOrderStatusWasChangedToCompleted($orderId));
+            $this->events->dispatch(new MollieOrderStatusChangedToCompleted($orderId));
 
             return;
         }
 
         if ($order->status === OrderStatus::STATUS_EXPIRED) {
-            $this->events->dispatch(new MollieOrderStatusWasChangedToExpired($orderId));
+            $this->events->dispatch(new MollieOrderStatusChangedToExpired($orderId));
 
             return;
         }
 
         if ($order->status === OrderStatus::STATUS_CANCELED) {
-            $this->events->dispatch(new MollieOrderStatusWasChangedToCanceled($orderId));
+            $this->events->dispatch(new MollieOrderStatusChangedToCanceled($orderId));
 
             return;
         }

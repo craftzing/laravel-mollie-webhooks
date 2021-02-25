@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Events;
 
-final class MollieOrderStatusWasChangedToCanceled
+final class MollieOrderStatusChangedToPaid
 {
     use ExposesOrderId;
 }
