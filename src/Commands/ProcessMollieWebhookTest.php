@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Commands;
 
+use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieResourceStatusWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\UnexpectedWebhookPayload;
@@ -57,6 +58,11 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
 
     public function webhookPayloads(): Generator
     {
+        yield 'order resource id' => [
+            fn () => $this->generateOrderId(),
+            MollieOrderWasUpdated::class,
+        ];
+
         yield 'payment resource id' => [
             fn () => $this->generatePaymentId(),
             MolliePaymentWasUpdated::class,
