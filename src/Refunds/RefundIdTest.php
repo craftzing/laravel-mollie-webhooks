@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Refunds;
 
-use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidRefundId;
+use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\PrefixedResourceIdTestCase;
 
 final class RefundIdTest extends PrefixedResourceIdTestCase
@@ -21,6 +21,6 @@ final class RefundIdTest extends PrefixedResourceIdTestCase
 
     protected function expectedExceptionClass(): string
     {
-        return InvalidRefundId::class;
+        return InvalidResourceId::class;
     }
 }

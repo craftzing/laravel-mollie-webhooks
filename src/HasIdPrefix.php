@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks;
 
+use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidResourceId;
+use Illuminate\Support\Str;
+
 trait HasIdPrefix
 {
     private string $value;
@@ -14,7 +17,14 @@ trait HasIdPrefix
         $this->value = $value;
     }
 
-    abstract protected function failWhenPrefixIsInvalid(string $value): void;
+    abstract protected function prefix(): string;
+
+    protected function failWhenPrefixIsInvalid(string $value): void
+    {
+        if (! Str::startsWith($value, $this->prefix())) {
+            throw InvalidResourceId::missingExpectedPrefix($value, $this->prefix());
+        }
+    }
 
     /**
      * @return static
