@@ -31,7 +31,7 @@ final class SubscribeToMollieOrderRefunds implements ShouldQueue
         $orderId = $event->orderId;
         $order = $this->orders->get($orderId->value());
 
-        if (empty($order->_links->refunds)) {
+        if (count($order->refunds()) === 0) {
             return;
         }
 
