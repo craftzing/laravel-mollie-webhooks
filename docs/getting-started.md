@@ -29,6 +29,23 @@ You can publish the package config file by running the command below, but it's n
 php artisan vendor:publish --provider="Craftzing\Laravel\MollieWebhooks\ServiceProvider" --tag="config"
 ```
 
+### Routes
+The package provides a macro to tie the route to the `HandleMollieWebhooksRequest` action request. 
+You can add it in the boot method of your `RouteServiceProvider` or directly in your route files.
+```php
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+
+final class RouteServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        $this->routes(function (Router $router) {
+            $router->mollieWebhooks('/mollie/webhook');
+        }
+    }
+}
+```
+
 ## ⚙️ Configuration
 
 If the package requires any configuration, this is where to document it. If it doesn't, remove this section.
