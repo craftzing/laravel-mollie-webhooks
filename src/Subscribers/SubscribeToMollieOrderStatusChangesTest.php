@@ -231,14 +231,6 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
      */
     public function itCanHandleWebhookCallsWithoutAnOrderStatusThatWeListenTo(string $status): void
     {
-        Event::fake([
-            MollieOrderStatusChangedToAuthorized::class,
-            MollieOrderStatusChangedToCanceled::class,
-            MollieOrderStatusChangedToCompleted::class,
-            MollieOrderStatusChangedToExpired::class,
-            MollieOrderStatusChangedToPaid::class,
-        ]);
-
         $webhookCall = $this->webhookCallIndicatingOrderStatusChangedTo($status);
         $orderId = OrderId::fromString($webhookCall->payload['id']);
 
@@ -246,6 +238,10 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
             new MollieOrderWasUpdated($orderId, $webhookCall),
         );
 
-        Event::assertNothingDispatched();
+        Event::assertNotDispatched(MollieOrderStatusChangedToAuthorized::class);
+        Event::assertNotDispatched(MollieOrderStatusChangedToCanceled::class);
+        Event::assertNotDispatched(MollieOrderStatusChangedToCompleted::class);
+        Event::assertNotDispatched(MollieOrderStatusChangedToExpired::class);
+        Event::assertNotDispatched(MollieOrderStatusChangedToPaid::class);
     }
 }

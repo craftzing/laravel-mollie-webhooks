@@ -207,13 +207,6 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
      */
     public function itCanHandleWebhookCallsWithoutAPaymentStatusThatWeListenTo(string $status): void
     {
-        Event::fake([
-            MolliePaymentStatusChangedToCanceled::class,
-            MolliePaymentStatusChangedToExpired::class,
-            MolliePaymentStatusChangedToFailed::class,
-            MolliePaymentStatusChangedToPaid::class,
-        ]);
-
         $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($status);
         $paymentId = PaymentId::fromString($webhookCall->payload['id']);
 
@@ -221,6 +214,9 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
             new MolliePaymentWasUpdated($paymentId, $webhookCall),
         );
 
-        Event::assertNothingDispatched();
+        Event::assertNotDispatched(MolliePaymentStatusChangedToCanceled::class);
+        Event::assertNotDispatched(MolliePaymentStatusChangedToExpired::class);
+        Event::assertNotDispatched(MolliePaymentStatusChangedToFailed::class);
+        Event::assertNotDispatched(MolliePaymentStatusChangedToPaid::class);
     }
 }
