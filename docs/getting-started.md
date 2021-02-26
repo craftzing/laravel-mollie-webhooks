@@ -41,7 +41,7 @@ final class RouteServiceProvider extends ServiceProvider
     {
         $this->routes(function (Router $router) {
             $router->mollieWebhooks('/mollie/webhook');
-        }
+        });
     }
 }
 ```
