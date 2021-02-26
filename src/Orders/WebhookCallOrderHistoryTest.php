@@ -109,7 +109,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
             $webhookCall,
         );
 
-        self::assertSame($expectedToHaveSameLatestStatus, $result);
+        $this->assertSame($expectedToHaveSameLatestStatus, $result);
         $this->assertDatabaseHas(FakeMollieWebhookCall::TABLE, [
             'id' => $webhookCall->getKey(),
             'payload' => json_encode(array_merge(
@@ -191,7 +191,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
             $webhookCall,
         );
 
-        self::assertSame($expectedToHaveTransferredRefund, $result);
+        $this->assertSame($expectedToHaveTransferredRefund, $result);
         $this->assertDatabaseHas(FakeMollieWebhookCall::TABLE, [
             'id' => $webhookCall->getKey(),
             'payload' => json_encode(array_merge(
