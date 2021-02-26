@@ -217,11 +217,11 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
     public function statusesThatDontFireEvents(): Generator
     {
         yield 'Call with status: `' . OrderStatus::STATUS_CREATED . '`' => [
-            OrderStatus::STATUS_CREATED
+            OrderStatus::STATUS_CREATED,
         ];
 
-        yield 'Call with status: ' . OrderStatus::STATUS_PENDING . '`'  => [
-            OrderStatus::STATUS_PENDING
+        yield 'Call with status: ' . OrderStatus::STATUS_PENDING . '`' => [
+            OrderStatus::STATUS_PENDING,
         ];
     }
 
