@@ -22,11 +22,6 @@ final class FakeOrdersEndpoint extends OrderEndpoint
     }
 
     /**
-     * @var \Mollie\Api\Resources\Order[]
-     */
-    private array $orders = [];
-
-    /**
      * {@inheritdoc}
      */
     public function get($orderId, array $parameters = []): Order

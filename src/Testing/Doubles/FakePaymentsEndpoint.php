@@ -22,11 +22,6 @@ final class FakePaymentsEndpoint extends PaymentEndpoint
     }
 
     /**
-     * @var \Mollie\Api\Resources\Payment[]
-     */
-    private array $payments = [];
-
-    /**
      * {@inheritdoc}
      */
     public function get($paymentId, array $parameters = []): Payment
