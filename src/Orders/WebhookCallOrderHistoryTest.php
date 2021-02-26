@@ -17,7 +17,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 {
     public function orderWebhookCallHistory(): Generator
     {
-        yield 'No webhook calls were made for the payment so far' => [
+        yield 'No webhook calls were made for the order so far' => [
             fn (): bool => false,
         ];
 
@@ -58,7 +58,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
             },
         ];
 
-        yield 'Latest webhook call for the payment was due to a refund, but the latest status differs' => [
+        yield 'Latest webhook call for the order was due to a refund, but the latest status differs' => [
             function (OrderId $orderId, string $status): bool {
                 $latestStatus = $this->randomOrderStatusExcept($status);
                 $secondALastWebhookCall = FakeMollieWebhookCall::new()
@@ -74,7 +74,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
             },
         ];
 
-        yield 'Latest webhook call for the payment was due to a refund, but the latest status is the same' => [
+        yield 'Latest webhook call for the order was due to a refund, but the latest status is the same' => [
             function (OrderId $orderId, string $status): bool {
                 $secondALastWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($orderId)
@@ -176,7 +176,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
      * @test
      * @dataProvider refundsWebhookCallHistory
      */
-    public function itCanCheckIfItHasATransferredRefundForAPayment(callable $resolveExpectedResult): void
+    public function itCanCheckIfItHasATransferredRefundForAnOrder(callable $resolveExpectedResult): void
     {
         $orderId = $this->generateOrderId();
         $refundId = $this->generateRefundId();
@@ -197,7 +197,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
             'payload' => json_encode(array_merge(
                 ['id' => $orderId->value()],
 
-                // Only when the PaymentHistory is not expected to have the transferred refund, we should expect
+                // Only when the OrderHistory is not expected to have the transferred refund, we should expect
                 // the freshly retrieved RefundId to be persisted to the ongoing webhook call payload.
                 ! $expectedToHaveTransferredRefund ? [
                     'refund' => [

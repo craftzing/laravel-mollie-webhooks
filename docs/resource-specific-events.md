@@ -100,7 +100,7 @@ final class AppServiceProvider extends ServiceProvider
 
 When Mollie calls the webhook with an order ID, we'll dispatch a generic event called
 `Craftzing\Laravel\MollieWebhooks\Events\MollieOrderWasUpdated`. You can listen for this event and determine what has
-changed on the payment yourself, but we also offer a couple of optional subscribers that can do this for you.
+changed on the order yourself, but we also offer a couple of optional subscribers that can do this for you.
 
 ### Subscribing to Order Status changes
 
