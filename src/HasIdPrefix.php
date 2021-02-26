@@ -19,7 +19,7 @@ trait HasIdPrefix
 
     abstract protected function prefix(): string;
 
-    protected function failWhenPrefixIsInvalid(string $value): void
+    private function failWhenPrefixIsInvalid(string $value): void
     {
         if (! Str::startsWith($value, $this->prefix())) {
             throw InvalidResourceId::missingExpectedPrefix($value, $this->prefix());
