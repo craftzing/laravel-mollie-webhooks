@@ -47,7 +47,16 @@ final class FakeMollieWebhookCall
         return tap(clone $this, fn (self $instance) => $instance->exception = 'Something went wrong');
     }
 
-    public function withStatusInPayload(string $status = ''): self
+    public function withOrderStatusInPayload(string $status = ''): self
+    {
+        if (! $status) {
+            $status = Arr::random(FakeOrder::STATUSES);
+        }
+
+        return $this->appendToPayload(['order_status' => $status]);
+    }
+
+    public function withPaymentStatusInPayload(string $status = ''): self
     {
         if (! $status) {
             $status = Arr::random(FakePayment::STATUSES);

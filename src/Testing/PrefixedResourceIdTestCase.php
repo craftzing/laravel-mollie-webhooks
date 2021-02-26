@@ -36,7 +36,7 @@ abstract class PrefixedResourceIdTestCase extends TestCase
     public function itCannotBeConstructedFromAnInvalidMollieResourceIdString(string $value): void
     {
         $this->expectExceptionObject(
-            call_user_func([$this->expectedExceptionClass(), 'missingExpectedPrefix'], $value)
+            call_user_func([$this->expectedExceptionClass(), 'missingExpectedPrefix'], $value, $this->expectedPrefix())
         );
 
         $this->resourceIdClass()::fromString($value);

@@ -6,15 +6,15 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Contracts\Foundation\Application;
-use Mollie\Api\Endpoints\PaymentEndpoint;
+use Mollie\Api\Endpoints\OrderEndpoint;
 use Mollie\Api\MollieApiClient;
-use Mollie\Api\Resources\Payment;
+use Mollie\Api\Resources\Order;
 
-final class FakePaymentsEndpoint extends PaymentEndpoint
+final class FakeOrdersEndpoint extends OrderEndpoint
 {
     use FakesMollie;
 
-    public ?Payment $payment = null;
+    public ?Order $order = null;
 
     public static function fake(Application $app): self
     {
@@ -24,8 +24,8 @@ final class FakePaymentsEndpoint extends PaymentEndpoint
     /**
      * {@inheritdoc}
      */
-    public function get($paymentId, array $parameters = []): Payment
+    public function get($orderId, array $parameters = []): Order
     {
-        return $this->payment;
+        return $this->order;
     }
 }

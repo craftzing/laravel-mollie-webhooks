@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Payments;
 
-use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidPaymentId;
+use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\PrefixedResourceIdTestCase;
 
 final class PaymentIdTest extends PrefixedResourceIdTestCase
@@ -21,6 +21,6 @@ final class PaymentIdTest extends PrefixedResourceIdTestCase
 
     protected function expectedExceptionClass(): string
     {
-        return InvalidPaymentId::class;
+        return InvalidResourceId::class;
     }
 }

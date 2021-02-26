@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Concerns;
 
+use Craftzing\Laravel\MollieWebhooks\Orders\OrderId;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieApiClient;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeOrder;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeOrdersEndpoint;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePaymentsEndpoint;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund;
@@ -42,11 +45,17 @@ trait FakesMollie
         $this->app['config']->set('mollie.key', 'test_fakeMollieKeyContainingAtLeast30Characters');
         $client = FakeMollieApiClient::fake($this->app);
         $client->payments = FakePaymentsEndpoint::fake($this->app);
+        $client->orders = FakeOrdersEndpoint::fake($this->app);
 
         $this->swap(
             MollieApiWrapper::class,
             new MollieApiWrapper($this->app[Repository::class], $client),
         );
+    }
+
+    protected function generateOrderId(): OrderId
+    {
+        return OrderId::fromString(OrderId::PREFIX . Str::random(random_int(4, 16)));
     }
 
     protected function generatePaymentId(): PaymentId
@@ -57,6 +66,16 @@ trait FakesMollie
     protected function generateRefundId(): RefundId
     {
         return RefundId::fromString(RefundId::PREFIX . Str::random(random_int(4, 16)));
+    }
+
+    protected function randomOrderStatusExcept(string $excludeStatus = ''): string
+    {
+        $statuses = array_filter(
+            FakeOrder::STATUSES,
+            fn (string $status) => $status !== $excludeStatus,
+        );
+
+        return Arr::random($statuses);
     }
 
     protected function randomPaymentStatusExcept(string $excludeStatus = ''): string

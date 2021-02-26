@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Craftzing\Laravel\MollieWebhooks\Refunds;
+namespace Craftzing\Laravel\MollieWebhooks\Orders;
 
 use Craftzing\Laravel\MollieWebhooks\Exceptions\InvalidResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\PrefixedResourceIdTestCase;
 
-final class RefundIdTest extends PrefixedResourceIdTestCase
+final class OrderIdTest extends PrefixedResourceIdTestCase
 {
     protected function resourceIdClass(): string
     {
-        return RefundId::class;
+        return OrderId::class;
     }
 
     protected function expectedPrefix(): string
     {
-        return 're_';
+        return 'ord_';
     }
 
     protected function expectedExceptionClass(): string

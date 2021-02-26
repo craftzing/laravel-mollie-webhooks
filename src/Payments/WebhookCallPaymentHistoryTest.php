@@ -26,7 +26,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
                 $latestStatus = $this->randomPaymentStatusExcept($status);
                 $latestWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
-                    ->withStatusInPayload($latestStatus)
+                    ->withPaymentStatusInPayload($latestStatus)
                     ->create();
 
                 return false;
@@ -37,7 +37,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
             function (PaymentId $paymentId, string $status): bool {
                 $latestWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
-                    ->withStatusInPayload($status)
+                    ->withPaymentStatusInPayload($status)
                     ->create();
 
                 return true;
@@ -48,7 +48,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
             function (PaymentId $paymentId, string $status): bool {
                 $secondALastWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
-                    ->withStatusInPayload($status)
+                    ->withPaymentStatusInPayload($status)
                     ->create();
                 $latestWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
@@ -63,7 +63,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
                 $latestStatus = $this->randomPaymentStatusExcept($status);
                 $secondALastWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
-                    ->withStatusInPayload($latestStatus)
+                    ->withPaymentStatusInPayload($latestStatus)
                     ->create();
                 $latestWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
@@ -78,7 +78,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
             function (PaymentId $paymentId, string $status): bool {
                 $secondALastWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)
-                    ->withStatusInPayload($status)
+                    ->withPaymentStatusInPayload($status)
                     ->create();
                 $latestWebhookCall = FakeMollieWebhookCall::new()
                     ->forResourceId($paymentId)

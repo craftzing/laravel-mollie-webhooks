@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Craftzing\Laravel\MollieWebhooks\Payments;
+namespace Craftzing\Laravel\MollieWebhooks\Orders;
 
 use Craftzing\Laravel\MollieWebhooks\HasIdPrefix;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 
-final class PaymentId implements ResourceId
+final class OrderId implements ResourceId
 {
     use HasIdPrefix;
 
-    public const PREFIX = 'tr_';
+    public const PREFIX = 'ord_';
 
     protected function prefix(): string
     {

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks;
 
 use Craftzing\Laravel\MollieWebhooks\Http\Requests\HandleMollieWebhooksRequest;
+use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
+use Craftzing\Laravel\MollieWebhooks\Orders\WebhookCallOrderHistory;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Payments\WebhookCallPaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
@@ -39,5 +41,15 @@ final class MollieWebhooksServiceProviderTest extends IntegrationTestCase
         $paymentHistory = $this->app[PaymentHistory::class];
 
         $this->assertInstanceOf(WebhookCallPaymentHistory::class, $paymentHistory);
+    }
+
+    /**
+     * @test
+     */
+    public function itBindsADefaultImplementationForTheOrderHistory(): void
+    {
+        $orderHistory = $this->app[OrderHistory::class];
+
+        $this->assertInstanceOf(WebhookCallOrderHistory::class, $orderHistory);
     }
 }
