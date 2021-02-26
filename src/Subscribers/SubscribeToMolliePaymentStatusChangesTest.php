@@ -185,4 +185,38 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
             ->forResourceId($payment->id())
             ->create();
     }
+
+    public function statusesThatDontFireEvents(): Generator
+    {
+        yield 'Call with status `' . PaymentStatus::STATUS_AUTHORIZED . '`' => [
+            PaymentStatus::STATUS_AUTHORIZED,
+        ];
+
+        yield 'Call with status: `' . PaymentStatus::STATUS_OPEN . '`' => [
+            PaymentStatus::STATUS_OPEN,
+        ];
+
+        yield 'Call with status `' . PaymentStatus::STATUS_PENDING . '`' => [
+            PaymentStatus::STATUS_PENDING,
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider statusesThatDontFireEvents
+     */
+    public function itCanHandleWebhookCallsWithoutAPaymentStatusThatWeListenTo(string $status): void
+    {
+        $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($status);
+        $paymentId = PaymentId::fromString($webhookCall->payload['id']);
+
+        $this->app[SubscribeToMolliePaymentStatusChanges::class](
+            new MolliePaymentWasUpdated($paymentId, $webhookCall),
+        );
+
+        Event::assertNotDispatched(MolliePaymentStatusChangedToCanceled::class);
+        Event::assertNotDispatched(MolliePaymentStatusChangedToExpired::class);
+        Event::assertNotDispatched(MolliePaymentStatusChangedToFailed::class);
+        Event::assertNotDispatched(MolliePaymentStatusChangedToPaid::class);
+    }
 }
