@@ -120,7 +120,7 @@ final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
     {
         yield 'Transferred refund exists order history' => [
             function (FakeOrderHistory $fakeOrderHistory): bool {
-                $fakeOrderHistory->fakeHasTransferredRefundForOrder();
+                $fakeOrderHistory->fakeHasRefundWithStatusForOrder();
 
                 return true;
             },

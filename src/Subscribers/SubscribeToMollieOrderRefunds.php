@@ -31,21 +31,21 @@ final class SubscribeToMollieOrderRefunds implements ShouldQueue
         $orderId = $event->orderId;
         $order = $this->orders->get($orderId->value());
 
-        if (count($order->refunds()) === 0) {
-            return;
-        }
-
         /* @var \Mollie\Api\Resources\Refund $refund */
         foreach ($order->refunds() as $refund) {
-            // Mollie only calls the webhook for a refund when it was actually transferred to
-            // the customer. So we should only proceed with the refund if it's transferred.
-            if (! $refund->isTransferred()) {
+            $refundId = RefundId::fromString($refund->id);
+            $hasRefundWithStatusForOrder = $this->orderHistory->hasRefundWithStatusForOrder(
+                $orderId,
+                $refundId,
+                $refund->status,
+                $event->webhookCall,
+            );
+
+            if ($hasRefundWithStatusForOrder) {
                 continue;
             }
 
-            $refundId = RefundId::fromString($refund->id);
-
-            if (! $this->orderHistory->hasTransferredRefundForOrder($orderId, $refundId, $event->webhookCall)) {
+            if ($refund->isTransferred()) {
                 $this->events->dispatch(MollieRefundWasTransferred::forOrder($orderId, $refundId));
             }
         }

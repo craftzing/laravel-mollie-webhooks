@@ -6,9 +6,9 @@ namespace Craftzing\Laravel\MollieWebhooks\Orders;
 
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Generator;
-use Mollie\Api\Types\RefundStatus;
 
 use function array_merge;
 use function json_encode;
@@ -124,74 +124,84 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 
     public function refundsWebhookCallHistory(): Generator
     {
-        yield 'No webhook calls were made for the order' => [
-            fn (): bool => false,
-        ];
+        foreach (FakeRefund::STATUSES as $refundStatus) {
+            yield "$refundStatus - No webhook calls were made for the order" => [
+                fn (): string => $refundStatus,
+                false,
+            ];
 
-        yield 'Order has no refunds in the webhook call history' => [
-            function (OrderId $orderId): bool {
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->create();
+            yield "$refundStatus - Order has no refunds in the webhook call history" => [
+                function (OrderId $orderId) use ($refundStatus): string {
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->create();
 
-                return false;
-            },
-        ];
+                    return $refundStatus;
+                },
+                false,
+            ];
 
-        yield 'Order has same transferred refund in the webhook call history' => [
-            function (OrderId $orderId, RefundId $refundId): bool {
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withRefundInPayload($refundId)
-                    ->create();
+            yield "$refundStatus - Order has the refund with the same status in the webhook call history" => [
+                function (OrderId $orderId, RefundId $refundId) use ($refundStatus): string {
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withRefundInPayload($refundId, $refundStatus)
+                        ->create();
 
-                return true;
-            },
-        ];
+                    return $refundStatus;
+                },
+                true,
+            ];
 
-        yield 'Order has same refund with different status in the webhook call history' => [
-            function (OrderId $orderId, RefundId $refundId): bool {
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withRefundInPayload($refundId, $this->randomRefundStatusExcept(RefundStatus::STATUS_REFUNDED))
-                    ->create();
+            yield "$refundStatus - Order has the refund with a different status in the webhook call history" => [
+                function (OrderId $orderId, RefundId $refundId) use ($refundStatus): string {
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withRefundInPayload($refundId, $this->randomRefundStatusExcept($refundStatus))
+                        ->create();
 
-                return false;
-            },
-        ];
+                    return $refundStatus;
+                },
+                false,
+            ];
 
-        yield 'Order has a different transferred refund in the webhook call history' => [
-            function (OrderId $orderId, RefundId $refundId): bool {
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withRefundInPayload()
-                    ->create();
+            yield "$refundStatus - Order has a different refund with the same status in the webhook call history" => [
+                function (OrderId $orderId, RefundId $refundId) use ($refundStatus): string {
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withRefundInPayload(null, $refundStatus)
+                        ->create();
 
-                return false;
-            },
-        ];
+                    return $refundStatus;
+                },
+                false,
+            ];
+        }
     }
 
     /**
      * @test
      * @dataProvider refundsWebhookCallHistory
      */
-    public function itCanCheckIfItHasATransferredRefundForAnOrder(callable $resolveExpectedResult): void
-    {
+    public function itCanCheckIfItHasARefundWithAStatusForAnOrder(
+        callable $resolveRefundStatus,
+        bool $expectedToHaveRefundWithStatus
+    ): void {
         $orderId = $this->generateOrderId();
         $refundId = $this->generateRefundId();
-        $expectedToHaveTransferredRefund = $resolveExpectedResult($orderId, $refundId);
+        $refundStatus = $resolveRefundStatus($orderId, $refundId);
         $webhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($orderId)
             ->create();
 
-        $result = $this->app[WebhookCallOrderHistory::class]->hasTransferredRefundForOrder(
+        $result = $this->app[WebhookCallOrderHistory::class]->hasRefundWithStatusForOrder(
             $orderId,
             $refundId,
+            $refundStatus,
             $webhookCall,
         );
 
-        $this->assertSame($expectedToHaveTransferredRefund, $result);
+        $this->assertSame($expectedToHaveRefundWithStatus, $result);
         $this->assertDatabaseHas(FakeMollieWebhookCall::TABLE, [
             'id' => $webhookCall->getKey(),
             'payload' => json_encode(array_merge(
@@ -199,10 +209,10 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 
                 // Only when the OrderHistory is not expected to have the transferred refund, we should expect
                 // the freshly retrieved RefundId to be persisted to the ongoing webhook call payload.
-                ! $expectedToHaveTransferredRefund ? [
+                ! $expectedToHaveRefundWithStatus ? [
                     'refund' => [
                         'id' => $refundId->value(),
-                        'refund_status' => RefundStatus::STATUS_REFUNDED,
+                        'refund_status' => $refundStatus,
                     ],
                 ] : [],
             )),

@@ -8,7 +8,6 @@ use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Support\Arr;
-use Mollie\Api\Types\RefundStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 use function factory;
@@ -47,33 +46,24 @@ final class FakeMollieWebhookCall
         return tap(clone $this, fn (self $instance) => $instance->exception = 'Something went wrong');
     }
 
-    public function withOrderStatusInPayload(string $status = ''): self
+    public function withOrderStatusInPayload(string $status = null): self
     {
-        if (! $status) {
-            $status = Arr::random(FakeOrder::STATUSES);
-        }
+        $status ??= Arr::random(FakeOrder::STATUSES);
 
         return $this->appendToPayload(['order_status' => $status]);
     }
 
-    public function withPaymentStatusInPayload(string $status = ''): self
+    public function withPaymentStatusInPayload(string $status = null): self
     {
-        if (! $status) {
-            $status = Arr::random(FakePayment::STATUSES);
-        }
+        $status ??= Arr::random(FakePayment::STATUSES);
 
         return $this->appendToPayload(['payment_status' => $status]);
     }
 
-    public function withRefundInPayload(?RefundId $refundId = null, string $status = ''): self
+    public function withRefundInPayload(?RefundId $refundId = null, string $status = null): self
     {
-        if (! $refundId) {
-            $refundId = $this->generateRefundId();
-        }
-
-        if (! $status) {
-            $status = RefundStatus::STATUS_REFUNDED;
-        }
+        $refundId ??= $this->generateRefundId();
+        $status ??= $this->randomRefundStatusExcept();
 
         return $this->appendToPayload([
             'refund' => [

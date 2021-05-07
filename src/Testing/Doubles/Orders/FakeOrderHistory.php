@@ -12,7 +12,7 @@ use Spatie\WebhookClient\Models\WebhookCall;
 final class FakeOrderHistory implements OrderHistory
 {
     private ?string $latestStatus = null;
-    private bool $hasTransferredRefundForOrder = false;
+    private bool $hasRefundWithStatusForOrder = false;
 
     public function hasLatestStatusForOrder(
         OrderId $orderId,
@@ -27,16 +27,17 @@ final class FakeOrderHistory implements OrderHistory
         $this->latestStatus = $status;
     }
 
-    public function hasTransferredRefundForOrder(
+    public function hasRefundWithStatusForOrder(
         OrderId $orderId,
         RefundId $refundId,
+        string $refundStatus,
         WebhookCall $ongoingWebhookCall
     ): bool {
-        return $this->hasTransferredRefundForOrder;
+        return $this->hasRefundWithStatusForOrder;
     }
 
-    public function fakeHasTransferredRefundForOrder(): void
+    public function fakeHasRefundWithStatusForOrder(): void
     {
-        $this->hasTransferredRefundForOrder = true;
+        $this->hasRefundWithStatusForOrder = true;
     }
 }
