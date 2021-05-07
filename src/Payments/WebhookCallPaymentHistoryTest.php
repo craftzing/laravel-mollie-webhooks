@@ -17,7 +17,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
 {
     public function paymentWebhookCallHistory(): Generator
     {
-        yield 'No webhook calls were made for the payment so far' => [
+        yield 'No webhook calls were made for the payment' => [
             fn (): bool => false,
         ];
 

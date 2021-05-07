@@ -24,43 +24,28 @@ final class WebhookCallOrderHistory implements OrderHistory
         $this->latestMollieWebhookCallByResourceId = $latestMollieWebhookCallByResourceId;
     }
 
-    public function hasLatestStatusForOrder(
-        OrderId $orderId,
-        string $status,
-        WebhookCall $ongoingWebhookCall
-    ): bool {
+    public function hasLatestStatusForOrder(OrderId $orderId, string $status, WebhookCall $ongoingWebhookCall): bool
+    {
         $latestWebhookCall = $this->latestMollieWebhookCallByResourceId->find(
             $orderId,
             $ongoingWebhookCall,
-            WebhookPayloadFragment::fromKeys('order_status'),
+            WebhookPayloadFragment::fromValues(['order_status' => $status]),
         );
+
+        // When the latest status for the order in the webhook call history DOES match the freshly
+        // retrieved status, we should assume that the ongoing webhook call wasn't triggered due
+        // to an order status change. Hence, we SHOULDN'T persist it to the payload.
+        if ($latestWebhookCall) {
+            return true;
+        }
 
         // When we couldn't find a previous webhook call for the order having a status in the payload, we should
         // assume that the ongoing webhook call was triggered due to an order status change. Therefore, we
         // should persist the freshly retrieved status to the payload of the ongoing webhook call in
         // order to have it as the latest status for that order for future webhook calls.
-        if (! $latestWebhookCall) {
-            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, ['order_status' => $status]);
+        $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, ['order_status' => $status]);
 
-            return false;
-        }
-
-        $latestOrderStatusInHistory = $this->webhookPayload($latestWebhookCall)['order_status'] ?? null;
-
-        // When the latest status for the order in the webhook call history does not match the freshly
-        // retrieved status, we should assume that the ongoing webhook call was triggered due to an
-        // order status change. So once again, we should persist the freshly retrieved status
-        // to the payload of the ongoing webhook call for future reference...
-        if ($latestOrderStatusInHistory !== $status) {
-            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, ['order_status' => $status]);
-
-            return false;
-        }
-
-        // When the latest status for the order in the webhook call history DOES match the freshly
-        // retrieved status, we should assume that the ongoing webhook call wasn't triggered due
-        // to an order status change. Hence, we SHOULDN'T persist it to the payload.
-        return true;
+        return false;
     }
 
     public function hasTransferredRefundForOrder(
@@ -78,19 +63,19 @@ final class WebhookCallOrderHistory implements OrderHistory
             WebhookPayloadFragment::fromValues($refund),
         );
 
+        // When the webhook call history has the settled refund for the order, we should
+        // assume that the ongoing webhook call was not triggered due to an order
+        // refund transfer. Hence, we SHOULDN'T persist it to the payload.
+        if ($latestWebhookCall) {
+            return true;
+        }
+
         // When we couldn't find a previous webhook call for the order having the refund in the payload, we should
         // assume that the ongoing webhook call was triggered due to an order refund transfer. Therefore, we
         // should persist the freshly retrieved refund to the payload of the ongoing webhook call in
         // order to have it as the settled refund for that order for future webhook calls.
-        if (! $latestWebhookCall) {
-            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, compact('refund'));
+        $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, compact('refund'));
 
-            return false;
-        }
-
-        // When the webhook call history has the settled refund for the order, we should
-        // assume that the ongoing webhook call was not triggered due to an order
-        // refund transfer. Hence, we SHOULDN'T persist it to the payload.
-        return true;
+        return false;
     }
 }

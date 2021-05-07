@@ -124,7 +124,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 
     public function refundsWebhookCallHistory(): Generator
     {
-        yield 'No webhook calls were made for the order so far' => [
+        yield 'No webhook calls were made for the order' => [
             fn (): bool => false,
         ];
 
