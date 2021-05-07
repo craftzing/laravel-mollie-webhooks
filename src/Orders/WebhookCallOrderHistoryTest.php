@@ -6,6 +6,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Orders;
 
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
+use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeOrder;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Generator;
@@ -17,88 +18,97 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 {
     public function orderWebhookCallHistory(): Generator
     {
-        yield 'No webhook calls were made for the order so far' => [
-            fn (): bool => false,
-        ];
+        foreach (FakeOrder::STATUSES as $orderStatus) {
+            yield "$orderStatus - No webhook calls were made for the order so far" => [
+                fn (): string => $orderStatus,
+                false,
+            ];
 
-        yield 'Latest order status in the webhook call history differs from the one in the current webhook call' => [
-            function (OrderId $orderId, string $status): bool {
-                $latestStatus = $this->randomOrderStatusExcept($status);
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withOrderStatusInPayload($latestStatus)
-                    ->create();
+            yield "$orderStatus - Latest order status in the webhook call history differs from the one in the current webhook call" => [
+                function (OrderId $orderId) use ($orderStatus): string {
+                    $latestStatus = $this->randomOrderStatusExcept($orderStatus);
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withOrderStatusInPayload($latestStatus)
+                        ->create();
 
-                return false;
-            },
-        ];
+                    return $orderStatus;
+                },
+                false,
+            ];
 
-        yield 'Latest order status in the webhook call history matches from the one in the current webhook call' => [
-            function (OrderId $orderId, string $status): bool {
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withOrderStatusInPayload($status)
-                    ->create();
+            yield "$orderStatus - Latest order status in the webhook call history matches from the one in the current webhook call" => [
+                function (OrderId $orderId) use ($orderStatus): string {
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withOrderStatusInPayload($orderStatus)
+                        ->create();
 
-                return true;
-            },
-        ];
+                    return $orderStatus;
+                },
+                true,
+            ];
 
-        yield 'Latest webhook call for the order did not include the status, but a webhook call before it does' => [
-            function (OrderId $orderId, string $status): bool {
-                $secondALastWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withOrderStatusInPayload($status)
-                    ->create();
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->create();
+            yield "$orderStatus - Latest webhook call for the order did not include the status, but a webhook call before it does" => [
+                function (OrderId $orderId) use ($orderStatus): string {
+                    $secondALastWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withOrderStatusInPayload($orderStatus)
+                        ->create();
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->create();
 
-                return true;
-            },
-        ];
+                    return $orderStatus;
+                },
+                true,
+            ];
 
-        yield 'Latest webhook call for the order was due to a refund, but the latest status differs' => [
-            function (OrderId $orderId, string $status): bool {
-                $latestStatus = $this->randomOrderStatusExcept($status);
-                $secondALastWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withOrderStatusInPayload($latestStatus)
-                    ->create();
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withRefundInPayload()
-                    ->create();
+            yield "$orderStatus - Latest webhook call for the order was due to a refund, but the latest status differs" => [
+                function (OrderId $orderId) use ($orderStatus): string {
+                    $latestStatus = $this->randomOrderStatusExcept($orderStatus);
+                    $secondALastWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withOrderStatusInPayload($latestStatus)
+                        ->create();
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withRefundInPayload()
+                        ->create();
 
-                return false;
-            },
-        ];
+                    return $orderStatus;
+                },
+                false,
+            ];
 
-        yield 'Latest webhook call for the order was due to a refund, but the latest status is the same' => [
-            function (OrderId $orderId, string $status): bool {
-                $secondALastWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withOrderStatusInPayload($status)
-                    ->create();
-                $latestWebhookCall = FakeMollieWebhookCall::new()
-                    ->forResourceId($orderId)
-                    ->withRefundInPayload()
-                    ->create();
+            yield "$orderStatus - Latest webhook call for the order was due to a refund, but the latest status is the same" => [
+                function (OrderId $orderId) use ($orderStatus): string {
+                    $secondALastWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withOrderStatusInPayload($orderStatus)
+                        ->create();
+                    $latestWebhookCall = FakeMollieWebhookCall::new()
+                        ->forResourceId($orderId)
+                        ->withRefundInPayload()
+                        ->create();
 
-                return true;
-            },
-        ];
+                    return $orderStatus;
+                },
+                true,
+            ];
+        }
     }
 
     /**
      * @test
      * @dataProvider orderWebhookCallHistory
      */
-    public function itCanCheckIfItHasALatestStatusForAnOrder(callable $resolveExpectedResult): void
-    {
+    public function itCanCheckIfItHasALatestStatusForAnOrder(
+        callable $resolveOrderStatus,
+        bool $expectedToHaveSameLatestStatus
+    ): void {
         $orderId = $this->generateOrderId();
-        $status = $this->randomOrderStatusExcept();
-        $expectedToHaveSameLatestStatus = $resolveExpectedResult($orderId, $status);
+        $status = $resolveOrderStatus($orderId);
         $webhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($orderId)
             ->create();
