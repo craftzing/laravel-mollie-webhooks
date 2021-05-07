@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Orders;
 
+use Craftzing\Laravel\MollieWebhooks\PersistsChangesToOngoingWebhookCallPayload;
 use Craftzing\Laravel\MollieWebhooks\Queries\LatestMollieWebhookCallByResourceId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\WebhookPayloadFragment;
 use Mollie\Api\Types\RefundStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-use function array_merge;
 use function compact;
 
 final class WebhookCallOrderHistory implements OrderHistory
 {
+    use PersistsChangesToOngoingWebhookCallPayload;
+
     private LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId;
 
     public function __construct(LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId)
@@ -90,21 +92,5 @@ final class WebhookCallOrderHistory implements OrderHistory
         // assume that the ongoing webhook call was not triggered due to an order
         // refund transfer. Hence, we SHOULDN'T persist it to the payload.
         return true;
-    }
-
-    /**
-     * @param array<mixed> $additionalPayload
-     */
-    private function persistChangeToOngoingWebhookCallPayload(WebhookCall $webhookCall, array $additionalPayload): void
-    {
-        $webhookCall->update(['payload' => array_merge($this->webhookPayload($webhookCall), $additionalPayload)]);
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private function webhookPayload(WebhookCall $webhookCall): array
-    {
-        return $webhookCall->getAttribute('payload') ?: [];
     }
 }
