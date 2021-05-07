@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderWasUpdated;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToFailed;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToPending;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToProcessing;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToQueued;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundWasTransferred;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
@@ -45,8 +49,34 @@ final class SubscribeToMollieOrderRefunds implements ShouldQueue
                 continue;
             }
 
+            if ($refund->isQueued()) {
+                $this->events->dispatch(MollieRefundStatusChangedToQueued::forOrder($orderId, $refundId));
+
+                continue;
+            }
+
+            if ($refund->isPending()) {
+                $this->events->dispatch(MollieRefundStatusChangedToPending::forOrder($orderId, $refundId));
+
+                continue;
+            }
+
+            if ($refund->isProcessing()) {
+                $this->events->dispatch(MollieRefundStatusChangedToProcessing::forOrder($orderId, $refundId));
+
+                continue;
+            }
+
             if ($refund->isTransferred()) {
                 $this->events->dispatch(MollieRefundWasTransferred::forOrder($orderId, $refundId));
+
+                continue;
+            }
+
+            if ($refund->isFailed()) {
+                $this->events->dispatch(MollieRefundStatusChangedToFailed::forOrder($orderId, $refundId));
+
+                continue;
             }
         }
     }

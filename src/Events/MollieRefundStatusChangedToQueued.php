@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Events;
 
-final class MollieRefundWasTransferred
+final class MollieRefundStatusChangedToQueued
 {
     use ExposesRefundId;
 }
