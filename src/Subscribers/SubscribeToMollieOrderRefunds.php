@@ -9,7 +9,7 @@ use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToFailed;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToPending;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToProcessing;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToQueued;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundWasTransferred;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToRefunded;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -68,7 +68,7 @@ final class SubscribeToMollieOrderRefunds implements ShouldQueue
             }
 
             if ($refund->isTransferred()) {
-                $this->events->dispatch(MollieRefundWasTransferred::forOrder($orderId, $refundId));
+                $this->events->dispatch(MollieRefundStatusChangedToRefunded::forOrder($orderId, $refundId));
 
                 continue;
             }

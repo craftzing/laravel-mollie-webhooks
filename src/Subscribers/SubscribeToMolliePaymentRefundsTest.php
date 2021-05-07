@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundWasTransferred;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToRefunded;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
@@ -61,7 +61,7 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
 
         $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
 
-        Event::assertNotDispatched(MollieRefundWasTransferred::class);
+        Event::assertNotDispatched(MollieRefundStatusChangedToRefunded::class);
     }
 
     public function nonTransferredRefund(): Generator
@@ -87,7 +87,7 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
 
         $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
 
-        Event::assertNotDispatched(MollieRefundWasTransferred::class);
+        Event::assertNotDispatched(MollieRefundStatusChangedToRefunded::class);
     }
 
     /**
@@ -106,10 +106,10 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
 
         $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
 
-        Event::assertDispatchedTimes(MollieRefundWasTransferred::class);
+        Event::assertDispatchedTimes(MollieRefundStatusChangedToRefunded::class);
         Event::assertDispatched(
-            MollieRefundWasTransferred::class,
-            new TruthTest(function (MollieRefundWasTransferred $event) use ($payment, $transferredRefund): void {
+            MollieRefundStatusChangedToRefunded::class,
+            new TruthTest(function (MollieRefundStatusChangedToRefunded $event) use ($payment, $transferredRefund): void {
                 $this->assertEquals($payment->id(), $event->resourceId);
                 $this->assertEquals($transferredRefund->id(), $event->refundId);
             }),
@@ -147,11 +147,11 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
         $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
 
         if ($hasTransferredRefundForPaymentInHistory) {
-            Event::assertNotDispatched(MollieRefundWasTransferred::class);
+            Event::assertNotDispatched(MollieRefundStatusChangedToRefunded::class);
         } else {
             Event::assertDispatched(
-                MollieRefundWasTransferred::class,
-                new TruthTest(function (MollieRefundWasTransferred $event) use ($payment, $refund): void {
+                MollieRefundStatusChangedToRefunded::class,
+                new TruthTest(function (MollieRefundStatusChangedToRefunded $event) use ($payment, $refund): void {
                     $this->assertEquals($payment->id(), $event->resourceId);
                     $this->assertEquals($refund->id(), $event->refundId);
                 }),

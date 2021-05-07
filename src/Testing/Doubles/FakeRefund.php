@@ -8,7 +8,7 @@ use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToFailed;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToPending;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToProcessing;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToQueued;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundWasTransferred;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToRefunded;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Contracts\Container\Container;
@@ -31,7 +31,7 @@ final class FakeRefund extends Refund
         RefundStatus::STATUS_QUEUED => MollieRefundStatusChangedToQueued::class,
         RefundStatus::STATUS_PENDING => MollieRefundStatusChangedToPending::class,
         RefundStatus::STATUS_PROCESSING => MollieRefundStatusChangedToProcessing::class,
-        RefundStatus::STATUS_REFUNDED => MollieRefundWasTransferred::class,
+        RefundStatus::STATUS_REFUNDED => MollieRefundStatusChangedToRefunded::class,
         RefundStatus::STATUS_FAILED => MollieRefundStatusChangedToFailed::class,
     ];
 

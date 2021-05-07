@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundWasTransferred;
+use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToRefunded;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -46,7 +46,7 @@ final class SubscribeToMolliePaymentRefunds implements ShouldQueue
             $refundId = RefundId::fromString($refund->id);
 
             if (! $this->paymentHistory->hasTransferredRefundForPayment($paymentId, $refundId, $event->webhookCall)) {
-                $this->events->dispatch(MollieRefundWasTransferred::forPayment($paymentId, $refundId));
+                $this->events->dispatch(MollieRefundStatusChangedToRefunded::forPayment($paymentId, $refundId));
             }
         }
     }
