@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToRefunded;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\FakePaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
-use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
 use Generator;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
-use Mollie\Api\Types\RefundStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
 {
     private FakePaymentHistory $fakePaymentHistory;
+
+    protected array $eventsToFake = FakeRefund::STATUS_EVENTS;
 
     /**
      * @before
@@ -49,85 +49,25 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
         });
     }
 
-    /**
-     * @test
-     */
-    public function itCanHandlePaymentsWithoutRefunds(): void
-    {
-        $payment = FakePayment::fake($this->app);
-        $webhookCall = FakeMollieWebhookCall::new()
-            ->forResourceId($payment->id())
-            ->create();
-
-        $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
-
-        Event::assertNotDispatched(MollieRefundStatusChangedToRefunded::class);
-    }
-
-    public function nonTransferredRefund(): Generator
-    {
-        foreach (FakeRefund::STATUSES as $status) {
-            if ($status !== RefundStatus::STATUS_REFUNDED) {
-                yield "Refund status is `$status`" => [$status];
-            }
-        }
-    }
-
-    /**
-     * @test
-     * @dataProvider nonTransferredRefund
-     */
-    public function itCanHandlePaymentsWithoutATransferredRefund(string $status): void
-    {
-        $refund = FakeRefund::fake($this->app)->withStatus($status);
-        $payment = FakePayment::fake($this->app)->withRefund($refund);
-        $webhookCall = FakeMollieWebhookCall::new()
-            ->forResourceId($payment->id())
-            ->create();
-
-        $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
-
-        Event::assertNotDispatched(MollieRefundStatusChangedToRefunded::class);
-    }
-
-    /**
-     * @test
-     */
-    public function itCanHandlePaymentsWithMultipleRefunds(): void
-    {
-        $notTransferredRefund = FakeRefund::fake($this->app)->notTransferred();
-        $transferredRefund = FakeRefund::fake($this->app)->transferred();
-        $payment = FakePayment::fake($this->app)
-            ->withRefund($notTransferredRefund)
-            ->withRefund($transferredRefund);
-        $webhookCall = FakeMollieWebhookCall::new()
-            ->forResourceId($payment->id())
-            ->create();
-
-        $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
-
-        Event::assertDispatchedTimes(MollieRefundStatusChangedToRefunded::class);
-        Event::assertDispatched(
-            MollieRefundStatusChangedToRefunded::class,
-            new TruthTest(function (MollieRefundStatusChangedToRefunded $event) use ($payment, $transferredRefund): void {
-                $this->assertEquals($payment->id(), $event->resourceId);
-                $this->assertEquals($transferredRefund->id(), $event->refundId);
-            }),
-        );
-    }
-
     public function paymentHistory(): Generator
     {
-        yield 'Transferred refund exists payment history' => [
-            function (FakePaymentHistory $fakePaymentHistory): bool {
-                $fakePaymentHistory->fakeHasTransferredRefundForPayment();
-
-                return true;
-            },
+        yield 'Payment has no refunds' => [
+            fn (): array => [],
         ];
 
-        yield 'Transferred refund does not exists payment history' => [
-            fn (): bool => false,
+        foreach (FakeRefund::STATUSES as $refundStatus) {
+            yield "Payment has a $refundStatus refund" => [
+                fn (Application $app): array => [
+                    FakeRefund::fake($app)->withStatus($refundStatus),
+                ],
+            ];
+        }
+
+        yield 'Payment has multiple refunds' => [
+            fn (Application $app): array => [
+                FakeRefund::fake($app)->withStatus(),
+                FakeRefund::fake($app)->withStatus(),
+            ],
         ];
     }
 
@@ -135,27 +75,51 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
      * @test
      * @dataProvider paymentHistory
      */
-    public function itCanHandleWebhookCallsIndicatingARefundWasTransferredForAPayment(callable $addPaymentHistory): void
+    public function itDispatchesRefundStatusEventsWhenTheStatusIsNotInThePaymentHistory(callable $resolveRefunds): void
     {
-        $refund = FakeRefund::fake($this->app)->transferred();
-        $payment = FakePayment::fake($this->app)->withRefund($refund);
-        $hasTransferredRefundForPaymentInHistory = $addPaymentHistory($this->fakePaymentHistory);
+        /** @var \Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund[] $refunds */
+        $refunds = $resolveRefunds($this->app);
+        $payment = FakePayment::fake($this->app)->withRefunds(...$refunds);
         $webhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($payment->id())
             ->create();
 
         $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
 
-        if ($hasTransferredRefundForPaymentInHistory) {
-            Event::assertNotDispatched(MollieRefundStatusChangedToRefunded::class);
-        } else {
+        if (! $refunds) {
+            Event::assertNothingDispatched();
+        }
+
+        foreach ($refunds as $refund) {
             Event::assertDispatched(
-                MollieRefundStatusChangedToRefunded::class,
-                new TruthTest(function (MollieRefundStatusChangedToRefunded $event) use ($payment, $refund): void {
-                    $this->assertEquals($payment->id(), $event->resourceId);
-                    $this->assertEquals($refund->id(), $event->refundId);
-                }),
+                $refund->statusEventClass(),
+                fn (object $event): bool =>
+                    $payment->id()->value() === $event->resourceId->value()
+                    && $refund->id()->value() === $event->refundId->value(),
             );
         }
+    }
+
+    /**
+     * @test
+     * @dataProvider paymentHistory
+     */
+    public function itDoesNotDispatchRefundStatusEventsWhenTheStatusExistsInThePaymentHistory(
+        callable $resolveRefunds
+    ): void {
+        /** @var \Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund[] $refunds */
+        $refunds = $resolveRefunds($this->app);
+        $order = FakePayment::fake($this->app)->withRefunds(...$refunds);
+        $webhookCall = FakeMollieWebhookCall::new()
+            ->forResourceId($order->id())
+            ->create();
+
+        foreach ($refunds as $refund) {
+            $this->fakePaymentHistory->fakeHasTransferredRefundForPayment($order->id(), $refund->id(), $refund->status);
+        }
+
+        $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($order->id(), $webhookCall));
+
+        Event::assertNothingDispatched();
     }
 }

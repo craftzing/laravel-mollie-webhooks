@@ -10,6 +10,8 @@ use Illuminate\Contracts\Container\Container;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
 
+use function array_merge;
+
 final class FakePayment extends Payment
 {
     use FakesMollie;
@@ -55,11 +57,11 @@ final class FakePayment extends Payment
         return $this;
     }
 
-    public function withRefund(?FakeRefund $refund = null): self
+    public function withRefunds(FakeRefund ...$refunds): self
     {
-        $refund = $refund ?: FakeRefund::fake($this->container);
+        $refunds ??= [FakeRefund::fake($this->container)];
 
-        $this->refunds[] = $refund;
+        $this->refunds = array_merge($this->refunds, $refunds);
 
         return $this;
     }

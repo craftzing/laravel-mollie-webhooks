@@ -6,13 +6,11 @@ namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
-use Craftzing\Laravel\MollieWebhooks\Orders\OrderId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Mollie\Api\Endpoints\OrderEndpoint;
 use Mollie\Laravel\Wrappers\MollieApiWrapper;
-use Spatie\WebhookClient\Models\WebhookCall;
 
 final class SubscribeToMollieOrderRefunds implements ShouldQueue
 {
@@ -35,22 +33,20 @@ final class SubscribeToMollieOrderRefunds implements ShouldQueue
 
         /* @var \Mollie\Api\Resources\Refund $refund */
         foreach ($order->refunds() as $refund) {
-            $this->dispatchRefundEvents($orderId, $refund, $event->webhookCall);
-        }
-    }
+            $refundId = RefundId::fromString($refund->id);
+            $hasRefundWithStatusForPayment = $this->orderHistory->hasRefundWithStatusForOrder(
+                $orderId,
+                $refundId,
+                $refund->status,
+                $event->webhookCall,
+            );
 
-    protected function hasRefundWithStatusForResource(
-        OrderId $resourceId,
-        RefundId $refundId,
-        string $refundStatus,
-        WebhookCall $ongoingWebhookCall
-    ): bool {
-        return $this->orderHistory->hasRefundWithStatusForOrder(
-            $resourceId,
-            $refundId,
-            $refundStatus,
-            $ongoingWebhookCall
-        );
+            if ($hasRefundWithStatusForPayment) {
+                continue;
+            }
+
+            $this->dispatchRefundEvents($orderId, $refundId, $refund);
+        }
     }
 
     public function subscribe(Dispatcher $events): void

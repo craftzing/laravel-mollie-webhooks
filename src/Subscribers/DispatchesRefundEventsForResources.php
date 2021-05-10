@@ -19,27 +19,8 @@ trait DispatchesRefundEventsForResources
 {
     private Dispatcher $events;
 
-    abstract protected function hasRefundWithStatusForResource(
-        ResourceId $resourceId,
-        RefundId $refundId,
-        string $refundStatus,
-        WebhookCall $ongoingWebhookCall
-    ): bool;
-
-    private function dispatchRefundEvents(ResourceId $resourceId, Refund $refund, WebhookCall $ongoingWebhookCall): void
+    private function dispatchRefundEvents(ResourceId $resourceId, RefundId $refundId, Refund $refund): void
     {
-        $refundId = RefundId::fromString($refund->id);
-        $hasRefundWithStatusForOrder = $this->hasRefundWithStatusForResource(
-            $resourceId,
-            $refundId,
-            $refund->status,
-            $ongoingWebhookCall,
-        );
-
-        if ($hasRefundWithStatusForOrder) {
-            return;
-        }
-
         if ($refund->isQueued()) {
             $this->events->dispatch(new MollieRefundStatusChangedToQueued($refundId, $resourceId));
 

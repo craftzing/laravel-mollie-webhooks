@@ -65,8 +65,8 @@ final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
 
         yield 'Order has multiple refunds' => [
             fn (Application $app): array => [
-                FakeRefund::fake($app)->withStatus('pending'),
-                FakeRefund::fake($app)->withStatus('pending'),
+                FakeRefund::fake($app)->withStatus(),
+                FakeRefund::fake($app)->withStatus(),
             ],
         ];
     }
