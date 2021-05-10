@@ -45,7 +45,7 @@ final class SubscribeToMolliePaymentRefunds implements ShouldQueue
 
             $refundId = RefundId::fromString($refund->id);
 
-            if (! $this->paymentHistory->hasTransferredRefundForPayment($paymentId, $refundId, $event->webhookCall)) {
+            if (! $this->paymentHistory->hasRefundWithStatusForPayment($paymentId, $refundId, $event->webhookCall)) {
                 $this->events->dispatch(MollieRefundStatusChangedToRefunded::forPayment($paymentId, $refundId));
             }
         }

@@ -27,9 +27,10 @@ final class FakePaymentHistory implements PaymentHistory
         $this->latestStatus = $status;
     }
 
-    public function hasTransferredRefundForPayment(
+    public function hasRefundWithStatusForPayment(
         PaymentId $paymentId,
         RefundId $refundId,
+        string $refundStatus,
         WebhookCall $ongoingWebhookCall
     ): bool {
         return $this->hasTransferredRefundForPayment;

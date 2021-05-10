@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 
+use Craftzing\Laravel\MollieWebhooks\Orders\OrderId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
@@ -19,6 +20,8 @@ final class FakeMollieWebhookCall
 
     public const TABLE = 'webhook_calls';
 
+    private ResourceId $resourceId;
+
     /**
      * @var mixed
      */
@@ -28,7 +31,8 @@ final class FakeMollieWebhookCall
 
     private function __construct()
     {
-        $this->payload = ['id' => $this->generatePaymentId()->value()];
+        $this->resourceId = $this->generatePaymentId();
+        $this->payload = ['id' => $this->resourceId->value()];
     }
 
     public static function new(): self
@@ -38,7 +42,10 @@ final class FakeMollieWebhookCall
 
     public function forResourceId(ResourceId $resourceId): self
     {
-        return tap(clone $this, fn (self $instance) => $instance->payload['id'] = $resourceId->value());
+        return tap(clone $this, function (self $instance) use ($resourceId): void {
+            $instance->resourceId = $resourceId;
+            $instance->payload['id'] = $resourceId->value();
+        });
     }
 
     public function failed(): self
@@ -58,6 +65,15 @@ final class FakeMollieWebhookCall
         $status ??= Arr::random(FakePayment::STATUSES);
 
         return $this->appendToPayload(['payment_status' => $status]);
+    }
+
+    public function withResourceStatusInPayload(string $resourceStatus): self
+    {
+        if ($this->resourceId instanceof OrderId) {
+            return $this->withOrderStatusInPayload($resourceStatus);
+        }
+
+        return $this->withPaymentStatusInPayload($resourceStatus);
     }
 
     public function withRefundInPayload(?RefundId $refundId = null, string $status = null): self

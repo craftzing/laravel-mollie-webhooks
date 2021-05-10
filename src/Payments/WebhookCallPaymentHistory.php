@@ -8,7 +8,6 @@ use Craftzing\Laravel\MollieWebhooks\PersistsChangesToOngoingWebhookCallPayload;
 use Craftzing\Laravel\MollieWebhooks\Queries\LatestMollieWebhookCallByResourceId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\WebhookPayloadFragment;
-use Mollie\Api\Types\RefundStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 use function compact;
@@ -51,14 +50,15 @@ final class WebhookCallPaymentHistory implements PaymentHistory
         return false;
     }
 
-    public function hasTransferredRefundForPayment(
+    public function hasRefundWithStatusForPayment(
         PaymentId $paymentId,
         RefundId $refundId,
+        string $refundStatus,
         WebhookCall $ongoingWebhookCall
     ): bool {
         $refund = [
             'id' => $refundId->value(),
-            'refund_status' => RefundStatus::STATUS_REFUNDED,
+            'refund_status' => $refundStatus,
         ];
         $latestWebhookCall = $this->latestMollieWebhookCallByResourceId->find(
             $paymentId,
