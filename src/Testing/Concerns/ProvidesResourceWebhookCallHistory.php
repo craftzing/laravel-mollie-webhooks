@@ -100,7 +100,7 @@ trait ProvidesResourceWebhookCallHistory
     {
         foreach (FakeRefund::STATUSES as $refundStatus) {
             yield "$refundStatus - No webhook calls were made for the resource" => [
-                fn(): string => $refundStatus,
+                fn (): string => $refundStatus,
                 false,
             ];
 

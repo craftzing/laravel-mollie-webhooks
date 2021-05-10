@@ -13,7 +13,6 @@ use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mollie\Api\Resources\Refund;
-use Spatie\WebhookClient\Models\WebhookCall;
 
 trait DispatchesRefundEventsForResources
 {

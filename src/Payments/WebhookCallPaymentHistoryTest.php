@@ -28,8 +28,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
     public function itCanCheckIfItHasALatestStatusForAPayment(
         callable $resolveOrderStatus,
         bool $expectedToHaveSameLatestStatus
-    ): void
-    {
+    ): void {
         $paymentId = $this->generatePaymentId();
         $status = $resolveOrderStatus($paymentId);
         $webhookCall = FakeMollieWebhookCall::new()
