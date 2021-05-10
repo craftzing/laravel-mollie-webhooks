@@ -15,9 +15,10 @@ interface OrderHistory
         WebhookCall $ongoingWebhookCall
     ): bool;
 
-    public function hasTransferredRefundForOrder(
+    public function hasRefundWithStatusForOrder(
         OrderId $orderId,
         RefundId $refundId,
+        string $refundStatus,
         WebhookCall $ongoingWebhookCall
     ): bool;
 }

@@ -12,13 +12,10 @@ use Spatie\WebhookClient\Models\WebhookCall;
 final class FakeOrderHistory implements OrderHistory
 {
     private ?string $latestStatus = null;
-    private bool $hasTransferredRefundForOrder = false;
+    private array $knownRefundsWithStatus = [];
 
-    public function hasLatestStatusForOrder(
-        OrderId $orderId,
-        string $status,
-        WebhookCall $ongoingWebhookCall
-    ): bool {
+    public function hasLatestStatusForOrder(OrderId $orderId, string $status, WebhookCall $ongoingWebhookCall): bool
+    {
         return $this->latestStatus === $status;
     }
 
@@ -27,16 +24,22 @@ final class FakeOrderHistory implements OrderHistory
         $this->latestStatus = $status;
     }
 
-    public function hasTransferredRefundForOrder(
+    public function hasRefundWithStatusForOrder(
         OrderId $orderId,
         RefundId $refundId,
+        string $refundStatus,
         WebhookCall $ongoingWebhookCall
     ): bool {
-        return $this->hasTransferredRefundForOrder;
+        return $this->knownRefundsWithStatus[$this->serializeRefundStatus($orderId, $refundId, $refundStatus)] ?? false;
     }
 
-    public function fakeHasTransferredRefundForOrder(): void
+    public function fakeHasRefundWithStatusForOrder(OrderId $orderId, RefundId $refundId, string $refundStatus): void
     {
-        $this->hasTransferredRefundForOrder = true;
+        $this->knownRefundsWithStatus[$this->serializeRefundStatus($orderId, $refundId, $refundStatus)] = true;
+    }
+
+    private function serializeRefundStatus(OrderId $orderId, RefundId $refundId, string $refundStatus): string
+    {
+        return "$orderId.$refundId.$refundStatus";
     }
 }

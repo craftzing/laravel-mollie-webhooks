@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderWasUpdated;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundWasTransferred;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -15,8 +14,9 @@ use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
 final class SubscribeToMollieOrderRefunds implements ShouldQueue
 {
+    use DispatchesRefundEventsForResources;
+
     private OrderEndpoint $orders;
-    private Dispatcher $events;
     private OrderHistory $orderHistory;
 
     public function __construct(MollieApiWrapper $mollie, Dispatcher $events, OrderHistory $orderHistory)
@@ -31,23 +31,21 @@ final class SubscribeToMollieOrderRefunds implements ShouldQueue
         $orderId = $event->orderId;
         $order = $this->orders->get($orderId->value());
 
-        if (count($order->refunds()) === 0) {
-            return;
-        }
-
         /* @var \Mollie\Api\Resources\Refund $refund */
         foreach ($order->refunds() as $refund) {
-            // Mollie only calls the webhook for a refund when it was actually transferred to
-            // the customer. So we should only proceed with the refund if it's transferred.
-            if (! $refund->isTransferred()) {
+            $refundId = RefundId::fromString($refund->id);
+            $hasRefundWithStatusForPayment = $this->orderHistory->hasRefundWithStatusForOrder(
+                $orderId,
+                $refundId,
+                $refund->status,
+                $event->webhookCall,
+            );
+
+            if ($hasRefundWithStatusForPayment) {
                 continue;
             }
 
-            $refundId = RefundId::fromString($refund->id);
-
-            if (! $this->orderHistory->hasTransferredRefundForOrder($orderId, $refundId, $event->webhookCall)) {
-                $this->events->dispatch(MollieRefundWasTransferred::forOrder($orderId, $refundId));
-            }
+            $this->dispatchRefundEvents($orderId, $refundId, $refund);
         }
     }
 

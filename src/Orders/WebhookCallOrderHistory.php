@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Orders;
 
+use Craftzing\Laravel\MollieWebhooks\PersistsChangesToOngoingWebhookCallPayload;
 use Craftzing\Laravel\MollieWebhooks\Queries\LatestMollieWebhookCallByResourceId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\WebhookPayloadFragment;
-use Mollie\Api\Types\RefundStatus;
 use Spatie\WebhookClient\Models\WebhookCall;
 
-use function array_merge;
 use function compact;
 
 final class WebhookCallOrderHistory implements OrderHistory
 {
+    use PersistsChangesToOngoingWebhookCallPayload;
+
     private LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId;
 
     public function __construct(LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId)
@@ -22,53 +23,39 @@ final class WebhookCallOrderHistory implements OrderHistory
         $this->latestMollieWebhookCallByResourceId = $latestMollieWebhookCallByResourceId;
     }
 
-    public function hasLatestStatusForOrder(
-        OrderId $orderId,
-        string $status,
-        WebhookCall $ongoingWebhookCall
-    ): bool {
+    public function hasLatestStatusForOrder(OrderId $orderId, string $status, WebhookCall $ongoingWebhookCall): bool
+    {
         $latestWebhookCall = $this->latestMollieWebhookCallByResourceId->find(
             $orderId,
             $ongoingWebhookCall,
-            WebhookPayloadFragment::fromKeys('order_status'),
+            WebhookPayloadFragment::fromValues(['order_status' => $status]),
         );
+
+        // When the latest status for the order in the webhook call history DOES match the freshly
+        // retrieved status, we should assume that the ongoing webhook call wasn't triggered due
+        // to an order status change. Hence, we shouldn't persist it to the payload.
+        if ($latestWebhookCall) {
+            return true;
+        }
 
         // When we couldn't find a previous webhook call for the order having a status in the payload, we should
         // assume that the ongoing webhook call was triggered due to an order status change. Therefore, we
         // should persist the freshly retrieved status to the payload of the ongoing webhook call in
         // order to have it as the latest status for that order for future webhook calls.
-        if (! $latestWebhookCall) {
-            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, ['order_status' => $status]);
+        $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, ['order_status' => $status]);
 
-            return false;
-        }
-
-        $latestOrderStatusInHistory = $this->webhookPayload($latestWebhookCall)['order_status'] ?? null;
-
-        // When the latest status for the order in the webhook call history does not match the freshly
-        // retrieved status, we should assume that the ongoing webhook call was triggered due to an
-        // order status change. So once again, we should persist the freshly retrieved status
-        // to the payload of the ongoing webhook call for future reference...
-        if ($latestOrderStatusInHistory !== $status) {
-            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, ['order_status' => $status]);
-
-            return false;
-        }
-
-        // When the latest status for the order in the webhook call history DOES match the freshly
-        // retrieved status, we should assume that the ongoing webhook call wasn't triggered due
-        // to an order status change. Hence, we SHOULDN'T persist it to the payload.
-        return true;
+        return false;
     }
 
-    public function hasTransferredRefundForOrder(
+    public function hasRefundWithStatusForOrder(
         OrderId $orderId,
         RefundId $refundId,
+        string $refundStatus,
         WebhookCall $ongoingWebhookCall
     ): bool {
         $refund = [
             'id' => $refundId->value(),
-            'refund_status' => RefundStatus::STATUS_REFUNDED,
+            'refund_status' => $refundStatus,
         ];
         $latestWebhookCall = $this->latestMollieWebhookCallByResourceId->find(
             $orderId,
@@ -76,35 +63,19 @@ final class WebhookCallOrderHistory implements OrderHistory
             WebhookPayloadFragment::fromValues($refund),
         );
 
+        // When the webhook call history has the settled refund for the order, we should
+        // assume that the ongoing webhook call was not triggered due to an order
+        // refund transfer. Hence, we shouldn't persist it to the payload.
+        if ($latestWebhookCall) {
+            return true;
+        }
+
         // When we couldn't find a previous webhook call for the order having the refund in the payload, we should
         // assume that the ongoing webhook call was triggered due to an order refund transfer. Therefore, we
         // should persist the freshly retrieved refund to the payload of the ongoing webhook call in
         // order to have it as the settled refund for that order for future webhook calls.
-        if (! $latestWebhookCall) {
-            $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, compact('refund'));
+        $this->persistChangeToOngoingWebhookCallPayload($ongoingWebhookCall, compact('refund'));
 
-            return false;
-        }
-
-        // When the webhook call history has the settled refund for the order, we should
-        // assume that the ongoing webhook call was not triggered due to an order
-        // refund transfer. Hence, we SHOULDN'T persist it to the payload.
-        return true;
-    }
-
-    /**
-     * @param array<mixed> $additionalPayload
-     */
-    private function persistChangeToOngoingWebhookCallPayload(WebhookCall $webhookCall, array $additionalPayload): void
-    {
-        $webhookCall->update(['payload' => array_merge($this->webhookPayload($webhookCall), $additionalPayload)]);
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    private function webhookPayload(WebhookCall $webhookCall): array
-    {
-        return $webhookCall->getAttribute('payload') ?: [];
+        return false;
     }
 }

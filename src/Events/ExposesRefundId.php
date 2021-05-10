@@ -9,7 +9,7 @@ use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 
-final class MollieRefundWasTransferred
+trait ExposesRefundId
 {
     /**
      * @readonly
@@ -21,19 +21,25 @@ final class MollieRefundWasTransferred
      */
     public ResourceId $resourceId;
 
-    private function __construct(RefundId $refundId, ResourceId $resourceId)
+    public function __construct(RefundId $refundId, ResourceId $resourceId)
     {
         $this->refundId = $refundId;
         $this->resourceId = $resourceId;
     }
 
+    /**
+     * @return static
+     */
     public static function forPayment(PaymentId $paymentId, RefundId $refundId): self
     {
-        return new self($refundId, $paymentId);
+        return new static($refundId, $paymentId);
     }
 
+    /**
+     * @return static
+     */
     public static function forOrder(OrderId $orderId, RefundId $refundId): self
     {
-        return new self($refundId, $orderId);
+        return new static($refundId, $orderId);
     }
 }

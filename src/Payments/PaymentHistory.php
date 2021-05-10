@@ -15,9 +15,10 @@ interface PaymentHistory
         WebhookCall $ongoingWebhookCall
     ): bool;
 
-    public function hasTransferredRefundForPayment(
+    public function hasRefundWithStatusForPayment(
         PaymentId $paymentId,
         RefundId $refundId,
+        string $refundStatus,
         WebhookCall $ongoingWebhookCall
     ): bool;
 }

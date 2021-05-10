@@ -12,7 +12,7 @@ use Spatie\WebhookClient\Models\WebhookCall;
 final class FakePaymentHistory implements PaymentHistory
 {
     private ?string $latestStatus = null;
-    private bool $hasTransferredRefundForPayment = false;
+    private array $knownRefundsWithStatus = [];
 
     public function hasLatestStatusForPayment(
         PaymentId $paymentId,
@@ -27,16 +27,24 @@ final class FakePaymentHistory implements PaymentHistory
         $this->latestStatus = $status;
     }
 
-    public function hasTransferredRefundForPayment(
+    public function hasRefundWithStatusForPayment(
         PaymentId $paymentId,
         RefundId $refundId,
+        string $refundStatus,
         WebhookCall $ongoingWebhookCall
     ): bool {
-        return $this->hasTransferredRefundForPayment;
+        $key = $this->serializeRefundStatus($paymentId, $refundId, $refundStatus);
+
+        return $this->knownRefundsWithStatus[$key] ?? false;
     }
 
-    public function fakeHasTransferredRefundForPayment(): void
+    public function fakeHasTransferredRefundForPayment(PaymentId $paymentId, RefundId $refundId, string $refundStatus): void
     {
-        $this->hasTransferredRefundForPayment = true;
+        $this->knownRefundsWithStatus[$this->serializeRefundStatus($paymentId, $refundId, $refundStatus)] = true;
+    }
+
+    private function serializeRefundStatus(PaymentId $paymentId, RefundId $refundId, string $refundStatus): string
+    {
+        return "$paymentId.$refundId.$refundStatus";
     }
 }
