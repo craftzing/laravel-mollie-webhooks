@@ -87,7 +87,7 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
         $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
 
         if (! $refunds) {
-            Event::assertNothingDispatched();
+            $this->assertNoEventsWereDispatched();
         }
 
         foreach ($refunds as $refund) {
@@ -120,6 +120,6 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
 
         $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($order->id(), $webhookCall));
 
-        Event::assertNothingDispatched();
+        $this->assertNoEventsWereDispatched();
     }
 }
