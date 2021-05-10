@@ -5,22 +5,20 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks\Subscribers;
 
 use Craftzing\Laravel\MollieWebhooks\Events\MollieOrderWasUpdated;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToFailed;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToPending;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToProcessing;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToQueued;
-use Craftzing\Laravel\MollieWebhooks\Events\MollieRefundStatusChangedToRefunded;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
+use Craftzing\Laravel\MollieWebhooks\Orders\OrderId;
 use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Mollie\Api\Endpoints\OrderEndpoint;
 use Mollie\Laravel\Wrappers\MollieApiWrapper;
+use Spatie\WebhookClient\Models\WebhookCall;
 
 final class SubscribeToMollieOrderRefunds implements ShouldQueue
 {
+    use DispatchesRefundEventsForResources;
+
     private OrderEndpoint $orders;
-    private Dispatcher $events;
     private OrderHistory $orderHistory;
 
     public function __construct(MollieApiWrapper $mollie, Dispatcher $events, OrderHistory $orderHistory)
@@ -37,48 +35,22 @@ final class SubscribeToMollieOrderRefunds implements ShouldQueue
 
         /* @var \Mollie\Api\Resources\Refund $refund */
         foreach ($order->refunds() as $refund) {
-            $refundId = RefundId::fromString($refund->id);
-            $hasRefundWithStatusForOrder = $this->orderHistory->hasRefundWithStatusForOrder(
-                $orderId,
-                $refundId,
-                $refund->status,
-                $event->webhookCall,
-            );
-
-            if ($hasRefundWithStatusForOrder) {
-                continue;
-            }
-
-            if ($refund->isQueued()) {
-                $this->events->dispatch(MollieRefundStatusChangedToQueued::forOrder($orderId, $refundId));
-
-                continue;
-            }
-
-            if ($refund->isPending()) {
-                $this->events->dispatch(MollieRefundStatusChangedToPending::forOrder($orderId, $refundId));
-
-                continue;
-            }
-
-            if ($refund->isProcessing()) {
-                $this->events->dispatch(MollieRefundStatusChangedToProcessing::forOrder($orderId, $refundId));
-
-                continue;
-            }
-
-            if ($refund->isTransferred()) {
-                $this->events->dispatch(MollieRefundStatusChangedToRefunded::forOrder($orderId, $refundId));
-
-                continue;
-            }
-
-            if ($refund->isFailed()) {
-                $this->events->dispatch(MollieRefundStatusChangedToFailed::forOrder($orderId, $refundId));
-
-                continue;
-            }
+            $this->dispatchRefundEvents($orderId, $refund, $event->webhookCall);
         }
+    }
+
+    protected function hasRefundWithStatusForResource(
+        OrderId $resourceId,
+        RefundId $refundId,
+        string $refundStatus,
+        WebhookCall $ongoingWebhookCall
+    ): bool {
+        return $this->orderHistory->hasRefundWithStatusForOrder(
+            $resourceId,
+            $refundId,
+            $refundStatus,
+            $ongoingWebhookCall
+        );
     }
 
     public function subscribe(Dispatcher $events): void

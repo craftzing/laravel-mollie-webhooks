@@ -21,7 +21,7 @@ trait ExposesRefundId
      */
     public ResourceId $resourceId;
 
-    private function __construct(RefundId $refundId, ResourceId $resourceId)
+    public function __construct(RefundId $refundId, ResourceId $resourceId)
     {
         $this->refundId = $refundId;
         $this->resourceId = $resourceId;
