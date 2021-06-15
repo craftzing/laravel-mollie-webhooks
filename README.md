@@ -46,7 +46,7 @@ Have an idea for a feature? Wanna improve the docs? Found a bug? Check out our [
 ## 💙 Thanks to...
 
 - [The entire Craftzing team](https://craftzing.com)
-- [All current and future contributors](https://github.com/creaftzing/laravel-mollie-webhooks/graphs/contributors)
+- [All current and future contributors](https://github.com/craftzing/laravel-mollie-webhooks/graphs/contributors)
 
 ## 🔑 License
 
