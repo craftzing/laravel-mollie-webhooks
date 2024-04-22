@@ -16,7 +16,7 @@ use function json_encode;
 
 trait ProvidesResourceWebhookCallHistory
 {
-    public function resourceWebhookCallHistory(string $resourceStatus, callable $resolveDifferentStatus): Generator
+    public static function resourceWebhookCallHistory(string $resourceStatus, callable $resolveDifferentStatus): Generator
     {
         yield "$resourceStatus - No webhook calls were made for the resource so far" => [
             fn (): string => $resourceStatus,
@@ -96,7 +96,7 @@ trait ProvidesResourceWebhookCallHistory
         ];
     }
 
-    public function refundsWebhookCallHistory(string $refundStatus): Generator
+    public static function refundsWebhookCallHistory(): Generator
     {
         foreach (FakeRefund::STATUSES as $refundStatus) {
             yield "$refundStatus - No webhook calls were made for the resource" => [
@@ -131,7 +131,7 @@ trait ProvidesResourceWebhookCallHistory
                 function (ResourceId $resourceId, RefundId $refundId) use ($refundStatus): string {
                     $latestWebhookCall = FakeMollieWebhookCall::new()
                         ->forResourceId($resourceId)
-                        ->withRefundInPayload($refundId, $this->randomRefundStatusExcept($refundStatus))
+                        ->withRefundInPayload($refundId, self::randomRefundStatusExcept($refundStatus))
                         ->create();
 
                     return $refundStatus;

@@ -61,7 +61,7 @@ trait FakesMollie
         return RefundId::fromString(RefundId::PREFIX . Str::random(random_int(4, 16)));
     }
 
-    protected function randomOrderStatusExcept(string $excludeStatus = ''): string
+    protected static function randomOrderStatusExcept(string $excludeStatus = ''): string
     {
         $statuses = array_filter(
             FakeOrder::STATUSES,
@@ -71,7 +71,7 @@ trait FakesMollie
         return Arr::random($statuses);
     }
 
-    protected function randomPaymentStatusExcept(string $excludeStatus = ''): string
+    protected static function randomPaymentStatusExcept(string $excludeStatus = ''): string
     {
         $statuses = array_filter(
             FakePayment::STATUSES,
@@ -81,7 +81,7 @@ trait FakesMollie
         return Arr::random($statuses);
     }
 
-    protected function randomRefundStatusExcept(string $excludeStatus = ''): string
+    protected static function randomRefundStatusExcept(string $excludeStatus = ''): string
     {
         $statuses = array_filter(
             FakeRefund::STATUSES,

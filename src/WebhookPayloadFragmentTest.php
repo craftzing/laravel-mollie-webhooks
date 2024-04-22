@@ -12,7 +12,7 @@ use function count;
 
 final class WebhookPayloadFragmentTest extends TestCase
 {
-    public function keys(): Generator
+    public static function keys(): Generator
     {
         yield 'No keys' => [''];
         yield 'Single key' => ['foo'];
@@ -34,7 +34,7 @@ final class WebhookPayloadFragmentTest extends TestCase
         $this->assertEmpty($payloadFragment->values());
     }
 
-    public function values(): Generator
+    public static function values(): Generator
     {
         yield 'No values' => [
             [],

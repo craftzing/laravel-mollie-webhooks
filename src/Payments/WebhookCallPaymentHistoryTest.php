@@ -14,10 +14,10 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
 {
     use ProvidesResourceWebhookCallHistory;
 
-    public function paymentWebhookCallHistory(): Generator
+    public static function paymentWebhookCallHistory(): Generator
     {
         foreach (FakePayment::STATUSES as $paymentStatus) {
-            yield from $this->resourceWebhookCallHistory($paymentStatus, $this->randomPaymentStatusExcept(...));
+            yield from self::resourceWebhookCallHistory($paymentStatus, self::randomPaymentStatusExcept(...));
         }
     }
 

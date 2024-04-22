@@ -9,17 +9,17 @@ use Craftzing\Laravel\MollieWebhooks\Testing\PrefixedResourceIdTestCase;
 
 final class OrderIdTest extends PrefixedResourceIdTestCase
 {
-    protected function resourceIdClass(): string
+    protected static function resourceIdClass(): string
     {
         return OrderId::class;
     }
 
-    protected function expectedPrefix(): string
+    protected static function expectedPrefix(): string
     {
         return 'ord_';
     }
 
-    protected function expectedExceptionClass(): string
+    protected static function expectedExceptionClass(): string
     {
         return InvalidResourceId::class;
     }

@@ -49,7 +49,7 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
         });
     }
 
-    public function paymentHistory(): Generator
+    public static function paymentHistory(): Generator
     {
         yield 'Payment has no refunds' => [
             fn (): array => [],

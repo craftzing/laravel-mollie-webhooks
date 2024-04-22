@@ -15,7 +15,7 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Payments\FakePaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
-use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
+use Craftzing\Laravel\MollieWebhooks\Testing\HandleAssertions;
 use Generator;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
@@ -52,7 +52,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         });
     }
 
-    public function paymentHistory(): Generator
+    public static function paymentHistory(): Generator
     {
         yield 'Payment history does not have status for the payment yet' => [
             fn () => null,
@@ -89,7 +89,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         } else {
             Event::assertDispatched(
                 MolliePaymentStatusChangedToPaid::class,
-                new TruthTest(function (MolliePaymentStatusChangedToPaid $event) use ($paymentId): void {
+                new HandleAssertions(function (MolliePaymentStatusChangedToPaid $event) use ($paymentId): void {
                     $this->assertSame($paymentId, $event->paymentId);
                 }),
             );
@@ -116,7 +116,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         } else {
             Event::assertDispatched(
                 MolliePaymentStatusChangedToExpired::class,
-                new TruthTest(function (MolliePaymentStatusChangedToExpired $event) use ($paymentId): void {
+                new HandleAssertions(function (MolliePaymentStatusChangedToExpired $event) use ($paymentId): void {
                     $this->assertSame($paymentId, $event->paymentId);
                 }),
             );
@@ -143,7 +143,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         } else {
             Event::assertDispatched(
                 MolliePaymentStatusChangedToFailed::class,
-                new TruthTest(function (MolliePaymentStatusChangedToFailed $event) use ($paymentId): void {
+                new HandleAssertions(function (MolliePaymentStatusChangedToFailed $event) use ($paymentId): void {
                     $this->assertSame($paymentId, $event->paymentId);
                 }),
             );
@@ -170,7 +170,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         } else {
             Event::assertDispatched(
                 MolliePaymentStatusChangedToCanceled::class,
-                new TruthTest(function (MolliePaymentStatusChangedToCanceled $event) use ($paymentId): void {
+                new HandleAssertions(function (MolliePaymentStatusChangedToCanceled $event) use ($paymentId): void {
                     $this->assertSame($paymentId, $event->paymentId);
                 }),
             );
@@ -186,7 +186,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
             ->create();
     }
 
-    public function statusesThatDontFireEvents(): Generator
+    public static function statusesThatDontFireEvents(): Generator
     {
         yield 'Call with status `' . PaymentStatus::STATUS_AUTHORIZED . '`' => [
             PaymentStatus::STATUS_AUTHORIZED,

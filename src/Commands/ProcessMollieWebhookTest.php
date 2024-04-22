@@ -9,7 +9,7 @@ use Craftzing\Laravel\MollieWebhooks\Events\MolliePaymentWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Events\MollieResourceStatusWasUpdated;
 use Craftzing\Laravel\MollieWebhooks\Exceptions\UnexpectedWebhookPayload;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
-use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
+use Craftzing\Laravel\MollieWebhooks\Testing\HandleAssertions;
 use Exception;
 use Generator;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -30,7 +30,7 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
         $this->assertInstanceOf(ShouldQueue::class, new ProcessMollieWebhook($webhookCall));
     }
 
-    public function invalidWebhookPayloads(): Generator
+    public static function invalidWebhookPayloads(): Generator
     {
         yield 'Missing a Mollie object identifier' => [
             [],
@@ -56,15 +56,15 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
         $this->handle(new ProcessMollieWebhook($webhookCall));
     }
 
-    public function webhookPayloads(): Generator
+    public static function webhookPayloads(): Generator
     {
         yield 'order resource id' => [
-            fn () => $this->generateOrderId(),
+            fn (self $test) => $test->generateOrderId(),
             MollieOrderWasUpdated::class,
         ];
 
         yield 'payment resource id' => [
-            fn () => $this->generatePaymentId(),
+            fn (self $test) => $test->generatePaymentId(),
             MolliePaymentWasUpdated::class,
         ];
     }
@@ -75,7 +75,7 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
      */
     public function itCanHandleIncomingWebhooks(callable $generatesResourceId, string $event): void
     {
-        $resourceId = $generatesResourceId();
+        $resourceId = $generatesResourceId($this);
         $webhookCall = new WebhookCall([
             'payload' => [
                 'id' => $resourceId->value(),
@@ -86,7 +86,7 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
 
         Event::assertDispatched(
             $event,
-            new TruthTest(function (MollieResourceStatusWasUpdated $event) use ($resourceId, $webhookCall): void {
+            new HandleAssertions(function (MollieResourceStatusWasUpdated $event) use ($resourceId, $webhookCall): void {
                 $this->assertSame($event->resourceId()->value(), $resourceId->value());
                 $this->assertTrue($event->webhookCall()->is($webhookCall));
             }),

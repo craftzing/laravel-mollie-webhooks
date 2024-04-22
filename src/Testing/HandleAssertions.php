@@ -6,7 +6,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing;
 
 use function call_user_func_array;
 
-final class TruthTest
+final class HandleAssertions
 {
     /**
      * @var callable
@@ -18,7 +18,7 @@ final class TruthTest
         $this->assertion = $assertion;
     }
 
-    public function __invoke(...$arguments): bool
+    public function __invoke(mixed ...$arguments): bool
     {
         call_user_func_array($this->assertion, $arguments);
 

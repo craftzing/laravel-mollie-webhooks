@@ -33,7 +33,7 @@ final class HandleMollieWebhooksRequestTest extends IntegrationTestCase
         });
     }
 
-    public function invalidPayloads(): Generator
+    public static function invalidPayloads(): Generator
     {
         yield 'Empty payload' => [
             [],
@@ -68,7 +68,7 @@ final class HandleMollieWebhooksRequestTest extends IntegrationTestCase
         Bus::assertDispatched(ProcessMollieWebhook::class);
     }
 
-    public function validPayloads(): Generator
+    public static function validPayloads(): Generator
     {
         yield 'Payload with a Mollie payment identifier' => [
             ['id' => PaymentId::PREFIX . Str::random(8)],

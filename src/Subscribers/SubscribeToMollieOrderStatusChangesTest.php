@@ -16,7 +16,7 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeOrder;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\Orders\FakeOrderHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
-use Craftzing\Laravel\MollieWebhooks\Testing\TruthTest;
+use Craftzing\Laravel\MollieWebhooks\Testing\HandleAssertions;
 use Generator;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
@@ -53,7 +53,7 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         });
     }
 
-    public function orderHistory(): Generator
+    public static function orderHistory(): Generator
     {
         yield 'Order history does not have status for the order yet' => [
             fn () => null,
@@ -90,7 +90,7 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         } else {
             Event::assertDispatched(
                 MollieOrderStatusChangedToPaid::class,
-                new TruthTest(function (MollieOrderStatusChangedToPaid $event) use ($orderId): void {
+                new HandleAssertions(function (MollieOrderStatusChangedToPaid $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );
@@ -117,7 +117,7 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         } else {
             Event::assertDispatched(
                 MollieOrderStatusChangedToExpired::class,
-                new TruthTest(function (MollieOrderStatusChangedToExpired $event) use ($orderId): void {
+                new HandleAssertions(function (MollieOrderStatusChangedToExpired $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );
@@ -144,7 +144,7 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         } else {
             Event::assertDispatched(
                 MollieOrderStatusChangedToAuthorized::class,
-                new TruthTest(function (MollieOrderStatusChangedToAuthorized $event) use ($orderId): void {
+                new HandleAssertions(function (MollieOrderStatusChangedToAuthorized $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );
@@ -171,7 +171,7 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         } else {
             Event::assertDispatched(
                 MollieOrderStatusChangedToCanceled::class,
-                new TruthTest(function (MollieOrderStatusChangedToCanceled $event) use ($orderId): void {
+                new HandleAssertions(function (MollieOrderStatusChangedToCanceled $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );
@@ -198,7 +198,7 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         } else {
             Event::assertDispatched(
                 MollieOrderStatusChangedToCompleted::class,
-                new TruthTest(function (MollieOrderStatusChangedToCompleted $event) use ($orderId): void {
+                new HandleAssertions(function (MollieOrderStatusChangedToCompleted $event) use ($orderId): void {
                     $this->assertSame($orderId, $event->orderId);
                 }),
             );
@@ -214,7 +214,7 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
             ->create();
     }
 
-    public function statusesThatDontFireEvents(): Generator
+    public static function statusesThatDontFireEvents(): Generator
     {
         yield 'Call with status: `' . OrderStatus::STATUS_CREATED . '`' => [
             OrderStatus::STATUS_CREATED,

@@ -14,10 +14,10 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 {
     use ProvidesResourceWebhookCallHistory;
 
-    public function orderWebhookCallHistory(): Generator
+    public static function orderWebhookCallHistory(): Generator
     {
         foreach (FakeOrder::STATUSES as $orderStatus) {
-            yield from $this->resourceWebhookCallHistory($orderStatus, $this->randomOrderStatusExcept(...));
+            yield from self::resourceWebhookCallHistory($orderStatus, self::randomOrderStatusExcept(...));
         }
     }
 

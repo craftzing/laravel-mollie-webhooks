@@ -9,17 +9,17 @@ use Craftzing\Laravel\MollieWebhooks\Testing\PrefixedResourceIdTestCase;
 
 final class RefundIdTest extends PrefixedResourceIdTestCase
 {
-    protected function resourceIdClass(): string
+    protected static function resourceIdClass(): string
     {
         return RefundId::class;
     }
 
-    protected function expectedPrefix(): string
+    protected static function expectedPrefix(): string
     {
         return 're_';
     }
 
-    protected function expectedExceptionClass(): string
+    protected static function expectedExceptionClass(): string
     {
         return InvalidResourceId::class;
     }

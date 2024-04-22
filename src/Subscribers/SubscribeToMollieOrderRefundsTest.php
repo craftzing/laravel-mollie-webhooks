@@ -49,7 +49,7 @@ final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
         });
     }
 
-    public function orderHistory(): Generator
+    public static function orderHistory(): Generator
     {
         yield 'Order has no refunds' => [
             fn (): array => [],
