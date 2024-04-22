@@ -13,20 +13,16 @@ final class MollieOrderWasUpdated implements MollieResourceStatusWasUpdated
 {
     use SerializesModels;
 
-    /**
-     * @readonly
-     */
-    public OrderId $orderId;
-
-    /**
-     * @readonly
-     */
-    public WebhookCall $webhookCall;
-
-    public function __construct(OrderId $orderId, WebhookCall $webhookCall)
-    {
-        $this->orderId = $orderId;
-        $this->webhookCall = $webhookCall;
+    public function __construct(
+        /**
+         * @readonly
+         */
+        public OrderId $orderId,
+        /**
+         * @readonly
+         */
+        public WebhookCall $webhookCall
+    ) {
     }
 
     public function resourceId(): ResourceId

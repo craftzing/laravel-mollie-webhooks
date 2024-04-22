@@ -22,8 +22,8 @@ final class LatestMollieWebhookCallByResourceId
             ->where('id', '!=', $ignoreWebhookCall->getKey())
             ->where('name', MollieSignatureValidator::NAME)
             ->where('payload', 'LIKE', "%\"id\":\"{$resourceId->value()}\"%")
-            ->when($payloadFragment, Closure::fromCallable([$this, 'filterByPayloadFragment']))
-            ->where(Closure::fromCallable([$this, 'ignoreFailedWebhookCalls']))
+            ->when($payloadFragment, ($this->filterByPayloadFragment(...))(...))
+            ->where(($this->ignoreFailedWebhookCalls(...))(...))
             ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc')
             ->first();

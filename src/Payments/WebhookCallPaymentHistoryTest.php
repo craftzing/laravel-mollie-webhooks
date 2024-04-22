@@ -17,7 +17,7 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
     public function paymentWebhookCallHistory(): Generator
     {
         foreach (FakePayment::STATUSES as $paymentStatus) {
-            yield from $this->resourceWebhookCallHistory($paymentStatus, [$this, 'randomPaymentStatusExcept']);
+            yield from $this->resourceWebhookCallHistory($paymentStatus, $this->randomPaymentStatusExcept(...));
         }
     }
 

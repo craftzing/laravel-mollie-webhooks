@@ -17,7 +17,7 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
     public function orderWebhookCallHistory(): Generator
     {
         foreach (FakeOrder::STATUSES as $orderStatus) {
-            yield from $this->resourceWebhookCallHistory($orderStatus, [$this, 'randomOrderStatusExcept']);
+            yield from $this->resourceWebhookCallHistory($orderStatus, $this->randomOrderStatusExcept(...));
         }
     }
 
