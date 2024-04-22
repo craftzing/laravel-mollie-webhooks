@@ -39,6 +39,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_TEST_REPORTER_ID }}
         with:
+          coverageCommand: vendor/bin/phpunit --verbose --coverage-clover=coverage.clover
           coverageLocations: ${{github.workspace}}/*.clover:clover
           debug: true
 
