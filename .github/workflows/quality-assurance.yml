@@ -36,7 +36,7 @@ jobs:
           composer update --prefer-dist --no-interaction
 
       - name: Run tests
-        run: vendor/bin/phpunit --verbose --coverage-clover=coverage.clover
+        run: vendor/bin/phpunit --debug --coverage-clover=coverage.clover
 
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v5.0.0
