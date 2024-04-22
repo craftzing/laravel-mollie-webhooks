@@ -13,11 +13,9 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeOrdersEndpoint;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePaymentsEndpoint;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund;
-use Illuminate\Contracts\Config\Repository;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
 use function array_filter;
 use function env;
@@ -46,11 +44,6 @@ trait FakesMollie
         $client = FakeMollieApiClient::fake($this->app);
         $client->payments = FakePaymentsEndpoint::fake($this->app);
         $client->orders = FakeOrdersEndpoint::fake($this->app);
-
-        $this->swap(
-            MollieApiWrapper::class,
-            new MollieApiWrapper($this->app[Repository::class], $client),
-        );
     }
 
     protected function generateOrderId(): OrderId

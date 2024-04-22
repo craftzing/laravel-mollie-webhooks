@@ -6,14 +6,21 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
+use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use stdClass;
 
 final class FakeMollieApiClient extends MollieApiClient
 {
+    /**
+     * @throws ApiException
+     */
     public static function fake(Application $app): self
     {
-        return $app->instance(self::class, new self());
+        $mollie = new self();
+        $mollie->setApiKey($app['config']->get('mollie.key'));
+
+        return $app->instance(MollieApiClient::class, $mollie);
     }
 
     public function performHttpCall($httpMethod, $apiMethod, $httpBody = null): stdClass

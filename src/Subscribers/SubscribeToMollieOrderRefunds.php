@@ -10,20 +10,22 @@ use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Mollie\Api\Endpoints\OrderEndpoint;
-use Mollie\Laravel\Wrappers\MollieApiWrapper;
+use Mollie\Api\MollieApiClient;
+use Mollie\Api\Resources\Refund;
 
 final class SubscribeToMollieOrderRefunds implements ShouldQueue
 {
     use DispatchesRefundEventsForResources;
 
     private OrderEndpoint $orders;
-    private OrderHistory $orderHistory;
 
-    public function __construct(MollieApiWrapper $mollie, Dispatcher $events, OrderHistory $orderHistory)
-    {
-        $this->orders = $mollie->orders();
+    public function __construct(
+        MollieApiClient $mollie,
+        Dispatcher $events,
+        private readonly OrderHistory $orderHistory,
+    ) {
+        $this->orders = $mollie->orders;
         $this->events = $events;
-        $this->orderHistory = $orderHistory;
     }
 
     public function __invoke(MollieOrderWasUpdated $event): void
@@ -31,7 +33,7 @@ final class SubscribeToMollieOrderRefunds implements ShouldQueue
         $orderId = $event->orderId;
         $order = $this->orders->get($orderId->value());
 
-        /* @var \Mollie\Api\Resources\Refund $refund */
+        /* @var Refund $refund */
         foreach ($order->refunds() as $refund) {
             $refundId = RefundId::fromString($refund->id);
             $hasRefundWithStatusForPayment = $this->orderHistory->hasRefundWithStatusForOrder(

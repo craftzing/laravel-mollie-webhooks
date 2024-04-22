@@ -14,20 +14,19 @@ use Craftzing\Laravel\MollieWebhooks\Orders\OrderHistory;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Mollie\Api\Endpoints\OrderEndpoint;
+use Mollie\Api\MollieApiClient;
 use Mollie\Api\Types\OrderStatus;
-use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
 final class SubscribeToMollieOrderStatusChanges implements ShouldQueue
 {
-    private OrderEndpoint $orders;
-    private Dispatcher $events;
-    private OrderHistory $orderHistory;
+    private readonly OrderEndpoint $orders;
 
-    public function __construct(MollieApiWrapper $mollie, Dispatcher $events, OrderHistory $orderHistory)
-    {
-        $this->orders = $mollie->orders();
-        $this->events = $events;
-        $this->orderHistory = $orderHistory;
+    public function __construct(
+        MollieApiClient $mollie,
+        private readonly Dispatcher $events,
+        private readonly OrderHistory $orderHistory
+    ) {
+        $this->orders = $mollie->orders;
     }
 
     public function __invoke(MollieOrderWasUpdated $event): void
