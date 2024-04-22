@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Queries;
 
-use Closure;
 use Craftzing\Laravel\MollieWebhooks\Http\MollieSignatureValidator;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\WebhookPayloadFragment;
