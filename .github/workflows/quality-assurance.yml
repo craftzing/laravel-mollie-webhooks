@@ -13,8 +13,10 @@ jobs:
         laravel: [^10.0, ^11.0]
         include:
           - laravel: ^11.0
+            phpunit: ^10.0
             testbench: ^9.0
           - laravel: ^10.0
+            phpunit: ^9.5
             testbench: ^8.0
     name: P${{ matrix.php }} - L${{ matrix.laravel }}
     steps:
@@ -30,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" "phpunit/phpunit:${{ matrix.phpunit }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --prefer-dist --no-interaction
 
       - name: Run tests
