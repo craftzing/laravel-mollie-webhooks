@@ -48,3 +48,6 @@ jobs:
       - name: Run PHPStan analysis
         run: vendor/bin/phpstan analyse --memory-limit=-1
         if: ${{ matrix.php == '8.2' }}
+
+      - name: Run PHP Coding Standards Fixer
+        run: vendor/bin/php-cs-fixer fix src --dry-run
