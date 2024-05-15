@@ -22,15 +22,16 @@ use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Mollie\Api\Types\OrderStatus;
+use PHPUnit\Framework\Attributes\Before;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
 {
     private FakeOrderHistory $fakeOrderHistory;
 
-    /**
-     * @before
-     */
+    #[Before]
     public function fakePaymentHistory(): void
     {
         $this->afterApplicationCreated(function (): void {
@@ -38,9 +39,7 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         });
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itCanBeRegisteredAsAQueuedSubscriberForTheGenericOrderEvent(): void
     {
         $this->dontFakeEvents();
@@ -70,10 +69,8 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider orderHistory
-     */
+    #[Test]
+    #[DataProvider('orderHistory')]
     public function itCanHandleWebhookCallsIndicatingAnOrderStatusChangedToPaid(callable $addOrderHistory): void
     {
         $paid = OrderStatus::STATUS_PAID;
@@ -97,10 +94,8 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider orderHistory
-     */
+    #[Test]
+    #[DataProvider('orderHistory')]
     public function itCanHandleWebhookCallsIndicatingAnOrderStatusChangedToExpired(callable $addOrderHistory): void
     {
         $expired = OrderStatus::STATUS_EXPIRED;
@@ -124,10 +119,8 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider orderHistory
-     */
+    #[Test]
+    #[DataProvider('orderHistory')]
     public function itCanHandleWebhookCallsIndicatingAnOrderStatusChangedToAuthorized(callable $addOrderHistory): void
     {
         $authorized = OrderStatus::STATUS_AUTHORIZED;
@@ -151,10 +144,8 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider orderHistory
-     */
+    #[Test]
+    #[DataProvider('orderHistory')]
     public function itCanHandleWebhookCallsIndicatingAnOrderStatusChangedToCanceled(callable $addOrderHistory): void
     {
         $canceled = OrderStatus::STATUS_CANCELED;
@@ -178,10 +169,8 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider orderHistory
-     */
+    #[Test]
+    #[DataProvider('orderHistory')]
     public function itCanHandleWebhookCallsIndicatingAnOrderStatusChangedToCompleted(callable $addOrderHistory): void
     {
         $completed = OrderStatus::STATUS_COMPLETED;
@@ -225,10 +214,8 @@ final class SubscribeToMollieOrderStatusChangesTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider statusesThatDontFireEvents
-     */
+    #[Test]
+    #[DataProvider('statusesThatDontFireEvents')]
     public function itCanHandleWebhookCallsWithoutAnOrderStatusThatWeListenTo(string $status): void
     {
         $webhookCall = $this->webhookCallIndicatingOrderStatusChangedTo($status);

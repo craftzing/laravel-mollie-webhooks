@@ -9,6 +9,8 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
 {
@@ -21,10 +23,8 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider paymentWebhookCallHistory
-     */
+    #[Test]
+    #[DataProvider('paymentWebhookCallHistory')]
     public function itCanCheckIfItHasALatestStatusForAPayment(
         callable $resolveOrderStatus,
         bool $expectedToHaveSameLatestStatus
@@ -52,10 +52,8 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider refundsWebhookCallHistory
-     */
+    #[Test]
+    #[DataProvider('refundsWebhookCallHistory')]
     public function itCanCheckIfItHasATransferredRefundForAPayment(
         callable $resolveRefundStatus,
         bool $expectedToHaveRefundWithStatus

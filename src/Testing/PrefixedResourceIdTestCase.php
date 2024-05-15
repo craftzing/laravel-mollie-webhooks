@@ -7,6 +7,8 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Generator;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use function call_user_func;
@@ -29,10 +31,8 @@ abstract class PrefixedResourceIdTestCase extends TestCase
         yield 'Value has an invalid prefix' => ['pa_' . Str::random(8)];
     }
 
-    /**
-     * @test
-     * @dataProvider invalidMollieResourceIds
-     */
+    #[Test]
+    #[DataProvider('invalidMollieResourceIds')]
     public function itCannotBeConstructedFromAnInvalidMollieResourceIdString(string $value): void
     {
         $this->expectExceptionObject(
@@ -48,10 +48,8 @@ abstract class PrefixedResourceIdTestCase extends TestCase
         yield 'Long identifier' => [fn (self $test): string => $test::expectedPrefix() . Str::random(8)];
     }
 
-    /**
-     * @test
-     * @dataProvider validMollieResourceIds
-     */
+    #[Test]
+    #[DataProvider('validMollieResourceIds')]
     public function itCanBeConstructedFromAValidMollieResourceIdString(callable $resolveValue): void
     {
         $value = $resolveValue($this);
@@ -61,10 +59,8 @@ abstract class PrefixedResourceIdTestCase extends TestCase
         $this->assertInstanceOf(ResourceId::class, $resourceId);
     }
 
-    /**
-     * @test
-     * @dataProvider validMollieResourceIds
-     */
+    #[Test]
+    #[DataProvider('validMollieResourceIds')]
     public function itCanBeCastedToAString(callable $resolveValue): void
     {
         $value = $resolveValue($this);
@@ -74,10 +70,8 @@ abstract class PrefixedResourceIdTestCase extends TestCase
         $this->assertSame($value, (string) $resourceId);
     }
 
-    /**
-     * @test
-     * @dataProvider validMollieResourceIds
-     */
+    #[Test]
+    #[DataProvider('validMollieResourceIds')]
     public function itCanReturnItsValue(callable $resolveValue): void
     {
         $value = $resolveValue($this);
@@ -87,10 +81,8 @@ abstract class PrefixedResourceIdTestCase extends TestCase
         $this->assertSame($value, $resourceId->value());
     }
 
-    /**
-     * @test
-     * @dataProvider validMollieResourceIds
-     */
+    #[Test]
+    #[DataProvider('validMollieResourceIds')]
     public function itCanBeSerialized(callable $resolveValue): void
     {
         $value = $resolveValue($this);
@@ -102,9 +94,7 @@ abstract class PrefixedResourceIdTestCase extends TestCase
         $this->assertEquals($resourceId, unserialize($serializedResourceId, [$this::resourceIdClass()]));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itCanBeUsedAsAResourceId(): void
     {
         $resourceId = $this::resourceIdClass()::fromString($this::expectedPrefix() . Str::random(8));

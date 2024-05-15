@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Craftzing\Laravel\MollieWebhooks;
 
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use function array_filter;
@@ -19,10 +21,8 @@ final class WebhookPayloadFragmentTest extends TestCase
         yield 'Multiple keys' => ['foo', 'bar', 'baz'];
     }
 
-    /**
-     * @test
-     * @dataProvider keys
-     */
+    #[Test]
+    #[DataProvider('keys')]
     public function itCanBeConstructedFromKeys(string ...$keys): void
     {
         $keys = array_filter($keys);
@@ -55,10 +55,8 @@ final class WebhookPayloadFragmentTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider values
-     */
+    #[Test]
+    #[DataProvider('values')]
     public function itCanBeConstructedFromValues(array $values): void
     {
         $values = array_filter($values);

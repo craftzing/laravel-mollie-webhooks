@@ -13,6 +13,9 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\Before;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 use function json_encode;
 
@@ -23,9 +26,7 @@ final class HandleMollieWebhooksRequestTest extends IntegrationTestCase
 
     private const URI = '/mollie/webhooks/handle';
 
-    /**
-     * @before
-     */
+    #[Before]
     public function registerWebhooksHandlerRoute(): void
     {
         $this->afterApplicationCreated(function (): void {
@@ -52,10 +53,8 @@ final class HandleMollieWebhooksRequestTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider invalidPayloads
-     */
+    #[Test]
+    #[DataProvider('invalidPayloads')]
     public function itCanHandleIncomingMollieWebhooksWithAnInvalidPayload(array $payload): void
     {
         $response = $this->post(self::URI, $payload);
@@ -75,10 +74,8 @@ final class HandleMollieWebhooksRequestTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider validPayloads
-     */
+    #[Test]
+    #[DataProvider('validPayloads')]
     public function itCanHandleIncomingMollieWebhooks(array $payload): void
     {
         $response = $this->post(self::URI, $payload);

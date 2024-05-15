@@ -21,15 +21,16 @@ use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Mollie\Api\Types\PaymentStatus;
+use PHPUnit\Framework\Attributes\Before;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCase
 {
     private FakePaymentHistory $fakePaymentHistory;
 
-    /**
-     * @before
-     */
+    #[Before]
     public function fakePaymentHistory(): void
     {
         $this->afterApplicationCreated(function (): void {
@@ -37,9 +38,7 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         });
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itCanBeRegisteredAsAQueuedSubscriberForTheGenericPaymentEvent(): void
     {
         $this->dontFakeEvents();
@@ -69,10 +68,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         }
     }
 
-    /**
-     * @test
-     * @dataProvider paymentHistory
-     */
+    #[Test]
+    #[DataProvider('paymentHistory')]
     public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToPaid(callable $addPaymentHistory): void
     {
         $paid = PaymentStatus::STATUS_PAID;
@@ -96,10 +93,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         }
     }
 
-    /**
-     * @test
-     * @dataProvider paymentHistory
-     */
+    #[Test]
+    #[DataProvider('paymentHistory')]
     public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToExpired(callable $addPaymentHistory): void
     {
         $expired = PaymentStatus::STATUS_EXPIRED;
@@ -123,10 +118,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         }
     }
 
-    /**
-     * @test
-     * @dataProvider paymentHistory
-     */
+    #[Test]
+    #[DataProvider('paymentHistory')]
     public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToFailed(callable $addPaymentHistory): void
     {
         $failed = PaymentStatus::STATUS_FAILED;
@@ -150,10 +143,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         }
     }
 
-    /**
-     * @test
-     * @dataProvider paymentHistory
-     */
+    #[Test]
+    #[DataProvider('paymentHistory')]
     public function itCanHandleWebhookCallsIndicatingAPaymentStatusChangedToCanceled(callable $addPaymentHistory): void
     {
         $canceled = PaymentStatus::STATUS_CANCELED;
@@ -201,10 +192,8 @@ final class SubscribeToMolliePaymentStatusChangesTest extends IntegrationTestCas
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider statusesThatDontFireEvents
-     */
+    #[Test]
+    #[DataProvider('statusesThatDontFireEvents')]
     public function itCanHandleWebhookCallsWithoutAPaymentStatusThatWeListenTo(string $status): void
     {
         $webhookCall = $this->webhookCallIndicatingPaymentStatusChangedTo($status);

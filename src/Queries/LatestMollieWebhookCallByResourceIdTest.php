@@ -10,6 +10,8 @@ use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\WebhookPayloadFragment;
 use Generator;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
@@ -33,10 +35,8 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider noResults
-     */
+    #[Test]
+    #[DataProvider('noResults')]
     public function itCanHandleNoResults(callable $addWebhookCallHistory): void
     {
         $resourceId = $this->generatePaymentId();
@@ -50,9 +50,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertNull($result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itCanFindTheLatestMollieWebhookCallByResourceId(): void
     {
         $resourceId = $this->generatePaymentId();
@@ -74,9 +72,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertTrue($result->is($latestWebhookCall));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itIgnoresFailedWebhookCalls(): void
     {
         $resourceId = $this->generatePaymentId();
@@ -120,10 +116,8 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider webhookCallByFragment
-     */
+    #[Test]
+    #[DataProvider('webhookCallByFragment')]
     public function itCanBeFilteredByPayloadFragmentKeys(callable $resolveExpectedWebhookCallFromHistory): void
     {
         $resourceId = $this->generatePaymentId();
@@ -142,10 +136,8 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertTrue($result->is($expectedWebhookCall));
     }
 
-    /**
-     * @test
-     * @dataProvider webhookCallByFragment
-     */
+    #[Test]
+    #[DataProvider('webhookCallByFragment')]
     public function itCanBeFilteredByAPayloadFragmentValues(callable $resolveExpectedWebhookCallFromHistory): void
     {
         $resourceId = $this->generatePaymentId();

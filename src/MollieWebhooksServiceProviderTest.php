@@ -12,14 +12,13 @@ use Craftzing\Laravel\MollieWebhooks\Payments\WebhookCallPaymentHistory;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
+use PHPUnit\Framework\Attributes\Test;
 
 final class MollieWebhooksServiceProviderTest extends IntegrationTestCase
 {
     private const URI = 'mollie/webhooks/handle';
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itExtendsTheRouterToEnableRegisteringARouteToHandleIncomingWebhooks(): void
     {
         $router = $this->app[Router::class];
@@ -33,9 +32,7 @@ final class MollieWebhooksServiceProviderTest extends IntegrationTestCase
         $this->assertSame(self::URI, $route->uri);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itBindsADefaultImplementationForThePaymentHistory(): void
     {
         $paymentHistory = $this->app[PaymentHistory::class];
@@ -43,9 +40,7 @@ final class MollieWebhooksServiceProviderTest extends IntegrationTestCase
         $this->assertInstanceOf(WebhookCallPaymentHistory::class, $paymentHistory);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itBindsADefaultImplementationForTheOrderHistory(): void
     {
         $orderHistory = $this->app[OrderHistory::class];

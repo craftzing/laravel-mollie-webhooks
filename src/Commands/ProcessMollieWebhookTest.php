@@ -14,15 +14,15 @@ use Exception;
 use Generator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Event;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 use function compact;
 
 final class ProcessMollieWebhookTest extends IntegrationTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function itShouldBeQueued(): void
     {
         $webhookCall = new WebhookCall([]);
@@ -43,10 +43,8 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider invalidWebhookPayloads
-     */
+    #[Test]
+    #[DataProvider('invalidWebhookPayloads')]
     public function itFailsWhenTheWebhookPayloadIsInvalid(array $payload, Exception $exception): void
     {
         $this->expectExceptionObject($exception);
@@ -69,10 +67,8 @@ final class ProcessMollieWebhookTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider webhookPayloads
-     */
+    #[Test]
+    #[DataProvider('webhookPayloads')]
     public function itCanHandleIncomingWebhooks(callable $generatesResourceId, string $event): void
     {
         $resourceId = $generatesResourceId($this);
