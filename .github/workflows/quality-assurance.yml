@@ -47,3 +47,4 @@ jobs:
 
       - name: Run PHPStan analysis
         run: vendor/bin/phpstan analyse --memory-limit=-1
+        if: ${{ matrix.php == '8.2' }}
