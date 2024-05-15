@@ -24,7 +24,7 @@ final class SubscribeToMollieOrderStatusChanges implements ShouldQueue
     public function __construct(
         MollieApiClient $mollie,
         private readonly Dispatcher $events,
-        private readonly OrderHistory $orderHistory
+        private readonly OrderHistory $orderHistory,
     ) {
         $this->orders = $mollie->orders;
     }
