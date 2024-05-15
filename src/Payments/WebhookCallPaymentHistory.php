@@ -17,7 +17,7 @@ final class WebhookCallPaymentHistory implements PaymentHistory
     use PersistsChangesToOngoingWebhookCallPayload;
 
     public function __construct(
-        private LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId,
+        private readonly LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId,
     ) {}
 
     public function hasLatestStatusForPayment(

@@ -16,7 +16,7 @@ final class SubscribeToMolliePaymentRefunds implements ShouldQueue
 {
     use DispatchesRefundEventsForResources;
 
-    private PaymentEndpoint $payments;
+    private readonly PaymentEndpoint $payments;
 
     public function __construct(
         MollieApiClient $mollie,

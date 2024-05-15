@@ -16,7 +16,7 @@ use Mollie\Api\Resources\Refund;
 
 trait DispatchesRefundEventsForResources
 {
-    private Dispatcher $events;
+    private readonly Dispatcher $events;
 
     private function dispatchRefundEvents(ResourceId $resourceId, RefundId $refundId, Refund $refund): void
     {
