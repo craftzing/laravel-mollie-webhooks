@@ -18,8 +18,7 @@ final class WebhookCallOrderHistory implements OrderHistory
 
     public function __construct(
         private LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId,
-    ) {
-    }
+    ) {}
 
     public function hasLatestStatusForOrder(OrderId $orderId, string $status, WebhookCall $ongoingWebhookCall): bool
     {

@@ -22,8 +22,7 @@ final class MolliePaymentWasUpdated implements MollieResourceStatusWasUpdated
          * @readonly
          */
         public WebhookCall $webhookCall
-    ) {
-    }
+    ) {}
 
     public function resourceId(): ResourceId
     {

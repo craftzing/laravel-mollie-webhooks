@@ -18,8 +18,7 @@ final class WebhookCallPaymentHistory implements PaymentHistory
 
     public function __construct(
         private LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId,
-    ) {
-    }
+    ) {}
 
     public function hasLatestStatusForPayment(
         PaymentId $paymentId,
