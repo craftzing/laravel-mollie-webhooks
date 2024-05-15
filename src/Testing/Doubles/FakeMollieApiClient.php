@@ -17,10 +17,7 @@ final class FakeMollieApiClient extends MollieApiClient
      */
     public static function fake(Application $app): self
     {
-        $mollie = new self();
-        $mollie->setApiKey($app['config']->get('mollie.key'));
-
-        return $app->instance(MollieApiClient::class, $mollie);
+        return $app->instance(MollieApiClient::class, new self());
     }
 
     public function performHttpCall($httpMethod, $apiMethod, $httpBody = null): stdClass
