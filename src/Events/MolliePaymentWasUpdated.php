@@ -13,21 +13,10 @@ final class MolliePaymentWasUpdated implements MollieResourceStatusWasUpdated
 {
     use SerializesModels;
 
-    /**
-     * @readonly
-     */
-    public PaymentId $paymentId;
-
-    /**
-     * @readonly
-     */
-    public WebhookCall $webhookCall;
-
-    public function __construct(PaymentId $paymentId, WebhookCall $webhookCall)
-    {
-        $this->paymentId = $paymentId;
-        $this->webhookCall = $webhookCall;
-    }
+    public function __construct(
+        public readonly PaymentId $paymentId,
+        public readonly WebhookCall $webhookCall,
+    ) {}
 
     public function resourceId(): ResourceId
     {

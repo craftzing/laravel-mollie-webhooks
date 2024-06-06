@@ -9,22 +9,22 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
 {
     use ProvidesResourceWebhookCallHistory;
 
-    public function paymentWebhookCallHistory(): Generator
+    public static function paymentWebhookCallHistory(): Generator
     {
         foreach (FakePayment::STATUSES as $paymentStatus) {
-            yield from $this->resourceWebhookCallHistory($paymentStatus, [$this, 'randomPaymentStatusExcept']);
+            yield from self::resourceWebhookCallHistory($paymentStatus, self::randomPaymentStatusExcept(...));
         }
     }
 
-    /**
-     * @test
-     * @dataProvider paymentWebhookCallHistory
-     */
+    #[Test]
+    #[DataProvider('paymentWebhookCallHistory')]
     public function itCanCheckIfItHasALatestStatusForAPayment(
         callable $resolveOrderStatus,
         bool $expectedToHaveSameLatestStatus
@@ -52,10 +52,8 @@ final class WebhookCallPaymentHistoryTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider refundsWebhookCallHistory
-     */
+    #[Test]
+    #[DataProvider('refundsWebhookCallHistory')]
     public function itCanCheckIfItHasATransferredRefundForAPayment(
         callable $resolveRefundStatus,
         bool $expectedToHaveRefundWithStatus

@@ -16,6 +16,9 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use PHPUnit\Framework\Attributes\Before;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
@@ -24,9 +27,7 @@ final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
 
     protected array $eventsToFake = FakeRefund::STATUS_EVENTS;
 
-    /**
-     * @before
-     */
+    #[Before]
     public function fakeOrderHistory(): void
     {
         $this->afterApplicationCreated(function (): void {
@@ -34,9 +35,7 @@ final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
         });
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itCanBeRegisteredAsAQueuedSubscriberForTheGenericOrderEvent(): void
     {
         $this->dontFakeEvents();
@@ -49,7 +48,7 @@ final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
         });
     }
 
-    public function orderHistory(): Generator
+    public static function orderHistory(): Generator
     {
         yield 'Order has no refunds' => [
             fn (): array => [],
@@ -71,10 +70,8 @@ final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider orderHistory
-     */
+    #[Test]
+    #[DataProvider('orderHistory')]
     public function itDispatchesRefundStatusEventsWhenTheStatusIsNotInTheOrderHistory(callable $resolveRefunds): void
     {
         /** @var \Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund[] $refunds */
@@ -100,10 +97,8 @@ final class SubscribeToMollieOrderRefundsTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider orderHistory
-     */
+    #[Test]
+    #[DataProvider('orderHistory')]
     public function itDoesNotDispatchRefundStatusEventsWhenTheStatusExistsInTheOrderHistory(
         callable $resolveRefunds
     ): void {

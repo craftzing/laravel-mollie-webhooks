@@ -13,20 +13,19 @@ use Craftzing\Laravel\MollieWebhooks\Payments\PaymentHistory;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Mollie\Api\Endpoints\PaymentEndpoint;
+use Mollie\Api\MollieApiClient;
 use Mollie\Api\Types\PaymentStatus;
-use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
 final class SubscribeToMolliePaymentStatusChanges implements ShouldQueue
 {
-    private PaymentEndpoint $payments;
-    private Dispatcher $events;
-    private PaymentHistory $paymentHistory;
+    private readonly PaymentEndpoint $payments;
 
-    public function __construct(MollieApiWrapper $mollie, Dispatcher $events, PaymentHistory $paymentHistory)
-    {
-        $this->payments = $mollie->payments();
-        $this->events = $events;
-        $this->paymentHistory = $paymentHistory;
+    public function __construct(
+        MollieApiClient $mollie,
+        private readonly Dispatcher $events,
+        private readonly PaymentHistory $paymentHistory,
+    ) {
+        $this->payments = $mollie->payments;
     }
 
     public function __invoke(MolliePaymentWasUpdated $event): void

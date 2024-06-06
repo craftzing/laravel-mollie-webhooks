@@ -11,7 +11,7 @@ use Craftzing\Laravel\MollieWebhooks\Exceptions\UnexpectedWebhookPayload;
 use Craftzing\Laravel\MollieWebhooks\Orders\OrderId;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Illuminate\Contracts\Events\Dispatcher;
-use Spatie\WebhookClient\ProcessWebhookJob;
+use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
 
 final class ProcessMollieWebhook extends ProcessWebhookJob
 {
@@ -36,7 +36,7 @@ final class ProcessMollieWebhook extends ProcessWebhookJob
             $this->handleOrderEvent(OrderId::fromString($id), $events);
 
             return;
-        } catch (InvalidResourceId $e) {
+        } catch (InvalidResourceId) {
             // The ID is not an OrderId, moving on to try and use it as a different Mollie resource ID.
         }
 

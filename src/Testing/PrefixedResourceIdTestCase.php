@@ -7,6 +7,8 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Generator;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use function call_user_func;
@@ -17,89 +19,85 @@ abstract class PrefixedResourceIdTestCase extends TestCase
 {
     private const EXPECTED_PREFIX = 're_';
 
-    abstract protected function resourceIdClass(): string;
+    abstract protected static function resourceIdClass(): string;
 
-    abstract protected function expectedPrefix(): string;
+    abstract protected static function expectedPrefix(): string;
 
-    abstract protected function expectedExceptionClass(): string;
+    abstract protected static function expectedExceptionClass(): string;
 
-    public function invalidMollieResourceIds(): Generator
+    public static function invalidMollieResourceIds(): Generator
     {
         yield 'Value has no prefix' => [Str::random(8)];
         yield 'Value has an invalid prefix' => ['pa_' . Str::random(8)];
     }
 
-    /**
-     * @test
-     * @dataProvider invalidMollieResourceIds
-     */
+    #[Test]
+    #[DataProvider('invalidMollieResourceIds')]
     public function itCannotBeConstructedFromAnInvalidMollieResourceIdString(string $value): void
     {
         $this->expectExceptionObject(
-            call_user_func([$this->expectedExceptionClass(), 'missingExpectedPrefix'], $value, $this->expectedPrefix())
+            call_user_func([$this::expectedExceptionClass(), 'missingExpectedPrefix'], $value, $this::expectedPrefix())
         );
 
-        $this->resourceIdClass()::fromString($value);
+        $this::resourceIdClass()::fromString($value);
     }
 
-    public function validMollieResourceIds(): Generator
+    public static function validMollieResourceIds(): Generator
     {
-        yield 'Short identifier' => [$this->expectedPrefix() . Str::random(4)];
-        yield 'Long identifier' => [$this->expectedPrefix() . Str::random(8)];
+        yield 'Short identifier' => [fn (self $test): string => $test::expectedPrefix() . Str::random(4)];
+        yield 'Long identifier' => [fn (self $test): string => $test::expectedPrefix() . Str::random(8)];
     }
 
-    /**
-     * @test
-     * @dataProvider validMollieResourceIds
-     */
-    public function itCanBeConstructedFromAValidMollieResourceIdString(string $value): void
+    #[Test]
+    #[DataProvider('validMollieResourceIds')]
+    public function itCanBeConstructedFromAValidMollieResourceIdString(callable $resolveValue): void
     {
-        $resourceId = $this->resourceIdClass()::fromString($value);
+        $value = $resolveValue($this);
+
+        $resourceId = $this::resourceIdClass()::fromString($value);
 
         $this->assertInstanceOf(ResourceId::class, $resourceId);
     }
 
-    /**
-     * @test
-     * @dataProvider validMollieResourceIds
-     */
-    public function itCanBeCastedToAString(string $value): void
+    #[Test]
+    #[DataProvider('validMollieResourceIds')]
+    public function itCanBeCastedToAString(callable $resolveValue): void
     {
-        $resourceId = $this->resourceIdClass()::fromString($value);
+        $value = $resolveValue($this);
+
+        $resourceId = $this::resourceIdClass()::fromString($value);
 
         $this->assertSame($value, (string) $resourceId);
     }
 
-    /**
-     * @test
-     * @dataProvider validMollieResourceIds
-     */
-    public function itCanReturnItsValue(string $value): void
+    #[Test]
+    #[DataProvider('validMollieResourceIds')]
+    public function itCanReturnItsValue(callable $resolveValue): void
     {
-        $resourceId = $this->resourceIdClass()::fromString($value);
+        $value = $resolveValue($this);
+
+        $resourceId = $this::resourceIdClass()::fromString($value);
 
         $this->assertSame($value, $resourceId->value());
     }
 
-    /**
-     * @test
-     * @dataProvider validMollieResourceIds
-     */
-    public function itCanBeSerialized(string $value): void
+    #[Test]
+    #[DataProvider('validMollieResourceIds')]
+    public function itCanBeSerialized(callable $resolveValue): void
     {
-        $resourceId = $this->resourceIdClass()::fromString($value);
+        $value = $resolveValue($this);
+
+        $resourceId = $this::resourceIdClass()::fromString($value);
 
         $serializedResourceId = serialize($resourceId);
 
-        $this->assertEquals($resourceId, unserialize($serializedResourceId));
+        $this->assertEquals($resourceId, unserialize($serializedResourceId, [$this::resourceIdClass()]));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itCanBeUsedAsAResourceId(): void
     {
-        $resourceId = $this->resourceIdClass()::fromString($this->expectedPrefix() . Str::random(8));
+        $resourceId = $this::resourceIdClass()::fromString($this::expectedPrefix() . Str::random(8));
 
         $this->assertInstanceOf(ResourceId::class, $resourceId);
     }

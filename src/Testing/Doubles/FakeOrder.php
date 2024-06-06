@@ -53,7 +53,7 @@ final class FakeOrder extends Order
 
     public function withStatus(string $status = ''): self
     {
-        $this->status = $status ?: $this->randomOrderStatusExcept();
+        $this->status = $status ?: $this::randomOrderStatusExcept();
 
         return $this;
     }

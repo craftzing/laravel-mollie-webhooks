@@ -10,20 +10,21 @@ use Craftzing\Laravel\MollieWebhooks\Refunds\RefundId;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Mollie\Api\Endpoints\PaymentEndpoint;
-use Mollie\Laravel\Wrappers\MollieApiWrapper;
+use Mollie\Api\MollieApiClient;
 
 final class SubscribeToMolliePaymentRefunds implements ShouldQueue
 {
     use DispatchesRefundEventsForResources;
 
-    private PaymentEndpoint $payments;
-    private PaymentHistory $paymentHistory;
+    private readonly PaymentEndpoint $payments;
 
-    public function __construct(MollieApiWrapper $mollie, Dispatcher $events, PaymentHistory $paymentHistory)
-    {
-        $this->payments = $mollie->payments();
+    public function __construct(
+        MollieApiClient $mollie,
+        Dispatcher $events,
+        private readonly PaymentHistory $paymentHistory,
+    ) {
+        $this->payments = $mollie->payments;
         $this->events = $events;
-        $this->paymentHistory = $paymentHistory;
     }
 
     public function __invoke(MolliePaymentWasUpdated $event): void

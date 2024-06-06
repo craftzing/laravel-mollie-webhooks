@@ -16,6 +16,9 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use PHPUnit\Framework\Attributes\Before;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
@@ -24,9 +27,7 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
 
     protected array $eventsToFake = FakeRefund::STATUS_EVENTS;
 
-    /**
-     * @before
-     */
+    #[Before]
     public function fakePaymentHistory(): void
     {
         $this->afterApplicationCreated(function (): void {
@@ -34,9 +35,7 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
         });
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itCanBeRegisteredAsAQueuedSubscriberForTheGenericPaymentEvent(): void
     {
         $this->dontFakeEvents();
@@ -49,7 +48,7 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
         });
     }
 
-    public function paymentHistory(): Generator
+    public static function paymentHistory(): Generator
     {
         yield 'Payment has no refunds' => [
             fn (): array => [],
@@ -71,10 +70,8 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider paymentHistory
-     */
+    #[Test]
+    #[DataProvider('paymentHistory')]
     public function itDispatchesRefundStatusEventsWhenTheStatusIsNotInThePaymentHistory(callable $resolveRefunds): void
     {
         /** @var \Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund[] $refunds */
@@ -100,10 +97,8 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider paymentHistory
-     */
+    #[Test]
+    #[DataProvider('paymentHistory')]
     public function itDoesNotDispatchRefundStatusEventsWhenTheStatusExistsInThePaymentHistory(
         callable $resolveRefunds
     ): void {

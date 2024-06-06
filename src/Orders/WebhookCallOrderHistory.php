@@ -16,12 +16,9 @@ final class WebhookCallOrderHistory implements OrderHistory
 {
     use PersistsChangesToOngoingWebhookCallPayload;
 
-    private LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId;
-
-    public function __construct(LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId)
-    {
-        $this->latestMollieWebhookCallByResourceId = $latestMollieWebhookCallByResourceId;
-    }
+    public function __construct(
+        private readonly LatestMollieWebhookCallByResourceId $latestMollieWebhookCallByResourceId,
+    ) {}
 
     public function hasLatestStatusForOrder(OrderId $orderId, string $status, WebhookCall $ongoingWebhookCall): bool
     {

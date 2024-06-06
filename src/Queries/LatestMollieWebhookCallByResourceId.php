@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Queries;
 
-use Closure;
 use Craftzing\Laravel\MollieWebhooks\Http\MollieSignatureValidator;
 use Craftzing\Laravel\MollieWebhooks\ResourceId;
 use Craftzing\Laravel\MollieWebhooks\WebhookPayloadFragment;
@@ -22,8 +21,8 @@ final class LatestMollieWebhookCallByResourceId
             ->where('id', '!=', $ignoreWebhookCall->getKey())
             ->where('name', MollieSignatureValidator::NAME)
             ->where('payload', 'LIKE', "%\"id\":\"{$resourceId->value()}\"%")
-            ->when($payloadFragment, Closure::fromCallable([$this, 'filterByPayloadFragment']))
-            ->where(Closure::fromCallable([$this, 'ignoreFailedWebhookCalls']))
+            ->when($payloadFragment, $this->filterByPayloadFragment(...))
+            ->where($this->ignoreFailedWebhookCalls(...))
             ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc')
             ->first();

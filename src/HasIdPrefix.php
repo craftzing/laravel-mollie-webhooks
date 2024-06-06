@@ -9,12 +9,12 @@ use Illuminate\Support\Str;
 
 trait HasIdPrefix
 {
-    private string $value;
-
-    private function __construct(string $value)
+    /**
+     * @throws InvalidResourceId
+     */
+    private function __construct(private readonly string $value)
     {
         $this->failWhenPrefixIsInvalid($value);
-        $this->value = $value;
     }
 
     abstract protected function prefix(): string;

@@ -10,13 +10,15 @@ use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Craftzing\Laravel\MollieWebhooks\WebhookPayloadFragment;
 use Generator;
 use Illuminate\Foundation\Testing\WithFaker;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\WebhookClient\Models\WebhookCall;
 
 final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
 {
     use WithFaker;
 
-    public function noResults(): Generator
+    public static function noResults(): Generator
     {
         yield 'Webhook call history is empty' => [
             fn () => null,
@@ -27,20 +29,18 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         ];
 
         yield 'Webhook call history has no recent calls from Mollie for payload fragment' => [
-            fn (ResourceId $resourceId) => FakeMollieWebhookCall::new()
+            fn (ResourceId $resourceId, self $test) => FakeMollieWebhookCall::new()
                 ->forResourceId($resourceId)
-                ->create(['name' => $this->makeFaker()->name]),
+                ->create(['name' => $test->makeFaker()->name]),
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider noResults
-     */
+    #[Test]
+    #[DataProvider('noResults')]
     public function itCanHandleNoResults(callable $addWebhookCallHistory): void
     {
         $resourceId = $this->generatePaymentId();
-        $addWebhookCallHistory($resourceId);
+        $addWebhookCallHistory($resourceId, $this);
         $ignoreWebhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($resourceId)
             ->create();
@@ -50,9 +50,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertNull($result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itCanFindTheLatestMollieWebhookCallByResourceId(): void
     {
         $resourceId = $this->generatePaymentId();
@@ -74,9 +72,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertTrue($result->is($latestWebhookCall));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function itIgnoresFailedWebhookCalls(): void
     {
         $resourceId = $this->generatePaymentId();
@@ -97,7 +93,7 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertTrue($result->is($latestWebhookCall));
     }
 
-    public function webhookCallByFragment(): Generator
+    public static function webhookCallByFragment(): Generator
     {
         yield 'Webhook call history with multiple scenarios' => [
             function (ResourceId $resourceId): WebhookCall {
@@ -120,10 +116,8 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider webhookCallByFragment
-     */
+    #[Test]
+    #[DataProvider('webhookCallByFragment')]
     public function itCanBeFilteredByPayloadFragmentKeys(callable $resolveExpectedWebhookCallFromHistory): void
     {
         $resourceId = $this->generatePaymentId();
@@ -142,10 +136,8 @@ final class LatestMollieWebhookCallByResourceIdTest extends IntegrationTestCase
         $this->assertTrue($result->is($expectedWebhookCall));
     }
 
-    /**
-     * @test
-     * @dataProvider webhookCallByFragment
-     */
+    #[Test]
+    #[DataProvider('webhookCallByFragment')]
     public function itCanBeFilteredByAPayloadFragmentValues(callable $resolveExpectedWebhookCallFromHistory): void
     {
         $resourceId = $this->generatePaymentId();

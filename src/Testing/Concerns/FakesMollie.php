@@ -13,11 +13,9 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeOrdersEndpoint;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePayment;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakePaymentsEndpoint;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund;
-use Illuminate\Contracts\Config\Repository;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Mollie\Laravel\Wrappers\MollieApiWrapper;
 
 use function array_filter;
 use function env;
@@ -46,11 +44,6 @@ trait FakesMollie
         $client = FakeMollieApiClient::fake($this->app);
         $client->payments = FakePaymentsEndpoint::fake($this->app);
         $client->orders = FakeOrdersEndpoint::fake($this->app);
-
-        $this->swap(
-            MollieApiWrapper::class,
-            new MollieApiWrapper($this->app[Repository::class], $client),
-        );
     }
 
     protected function generateOrderId(): OrderId
@@ -68,7 +61,7 @@ trait FakesMollie
         return RefundId::fromString(RefundId::PREFIX . Str::random(random_int(4, 16)));
     }
 
-    protected function randomOrderStatusExcept(string $excludeStatus = ''): string
+    protected static function randomOrderStatusExcept(string $excludeStatus = ''): string
     {
         $statuses = array_filter(
             FakeOrder::STATUSES,
@@ -78,7 +71,7 @@ trait FakesMollie
         return Arr::random($statuses);
     }
 
-    protected function randomPaymentStatusExcept(string $excludeStatus = ''): string
+    protected static function randomPaymentStatusExcept(string $excludeStatus = ''): string
     {
         $statuses = array_filter(
             FakePayment::STATUSES,
@@ -88,7 +81,7 @@ trait FakesMollie
         return Arr::random($statuses);
     }
 
-    protected function randomRefundStatusExcept(string $excludeStatus = ''): string
+    protected static function randomRefundStatusExcept(string $excludeStatus = ''): string
     {
         $statuses = array_filter(
             FakeRefund::STATUSES,

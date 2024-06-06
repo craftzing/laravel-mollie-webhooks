@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Craftzing\Laravel\MollieWebhooks\Exceptions;
 
-use Spatie\WebhookClient\Exceptions\WebhookFailed as SpatieWebhookFailed;
+use Exception;
 
-final class UnexpectedWebhookPayload extends SpatieWebhookFailed
+final class UnexpectedWebhookPayload extends Exception
 {
     public static function missingObjectIdentifier(): self
     {

@@ -8,7 +8,6 @@ use Craftzing\Laravel\MollieWebhooks\Exceptions\FakeExceptionHandler;
 use Craftzing\Laravel\MollieWebhooks\MollieWebhooksServiceProvider;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesEvents;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
-use CreateWebhookCallsTable;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables;
 use Illuminate\Support\Facades\Bus;
@@ -30,10 +29,10 @@ abstract class IntegrationTestCase extends OrchestraTestCase
 
     protected function setUpDatabase(): void
     {
-        include_once __DIR__ .
+        $migration = include __DIR__ .
             '/../../vendor/spatie/laravel-webhook-client/database/migrations/create_webhook_calls_table.php.stub';
 
-        (new CreateWebhookCallsTable())->up();
+        $migration->up();
     }
 
     protected function getEnvironmentSetUp($app): void
@@ -68,11 +67,7 @@ abstract class IntegrationTestCase extends OrchestraTestCase
         return [MollieWebhooksServiceProvider::class];
     }
 
-    /**
-     * @param object $class
-     * @return mixed
-     */
-    public function handle(object $class)
+    public function handle(object $class): mixed
     {
         return $this->app->call([$class, 'handle']);
     }

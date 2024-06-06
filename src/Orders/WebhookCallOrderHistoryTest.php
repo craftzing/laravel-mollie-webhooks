@@ -9,22 +9,22 @@ use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeMollieWebhookCall;
 use Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeOrder;
 use Craftzing\Laravel\MollieWebhooks\Testing\IntegrationTestCase;
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 final class WebhookCallOrderHistoryTest extends IntegrationTestCase
 {
     use ProvidesResourceWebhookCallHistory;
 
-    public function orderWebhookCallHistory(): Generator
+    public static function orderWebhookCallHistory(): Generator
     {
         foreach (FakeOrder::STATUSES as $orderStatus) {
-            yield from $this->resourceWebhookCallHistory($orderStatus, [$this, 'randomOrderStatusExcept']);
+            yield from self::resourceWebhookCallHistory($orderStatus, self::randomOrderStatusExcept(...));
         }
     }
 
-    /**
-     * @test
-     * @dataProvider orderWebhookCallHistory
-     */
+    #[Test]
+    #[DataProvider('orderWebhookCallHistory')]
     public function itCanCheckIfItHasALatestStatusForAnOrder(
         callable $resolveOrderStatus,
         bool $expectedToHaveSameLatestStatus
@@ -48,10 +48,8 @@ final class WebhookCallOrderHistoryTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * @test
-     * @dataProvider refundsWebhookCallHistory
-     */
+    #[Test]
+    #[DataProvider('refundsWebhookCallHistory')]
     public function itCanCheckIfItHasARefundWithAStatusForAnOrder(
         callable $resolveRefundStatus,
         bool $expectedToHaveRefundWithStatus
