@@ -107,16 +107,19 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
     ): void {
         /** @var \Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund[] $refunds */
         $refunds = $resolveRefunds($this->app);
-        $order = FakePayment::fake($this->app)->withRefunds(...$refunds);
+        $payment = FakePayment::fake($this->app);
+        if ($refunds !== []) {
+            $payment->withRefunds(...$refunds);
+        }
         $webhookCall = FakeMollieWebhookCall::new()
-            ->forResourceId($order->id())
+            ->forResourceId($payment->id())
             ->create();
 
         foreach ($refunds as $refund) {
-            $this->fakePaymentHistory->fakeHasTransferredRefundForPayment($order->id(), $refund->id(), $refund->status);
+            $this->fakePaymentHistory->fakeHasTransferredRefundForPayment($payment->id(), $refund->id(), $refund->status);
         }
 
-        $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($order->id(), $webhookCall));
+        $this->app[SubscribeToMolliePaymentRefunds::class](new MolliePaymentWasUpdated($payment->id(), $webhookCall));
 
         $this->assertNoEventsWereDispatched();
     }
