@@ -76,7 +76,10 @@ final class SubscribeToMolliePaymentRefundsTest extends IntegrationTestCase
     {
         /** @var \Craftzing\Laravel\MollieWebhooks\Testing\Doubles\FakeRefund[] $refunds */
         $refunds = $resolveRefunds($this->app);
-        $payment = FakePayment::fake($this->app)->withRefunds(...$refunds);
+        $payment = FakePayment::fake($this->app);
+        if ($refunds !== []) {
+            $payment->withRefunds(...$refunds);
+        }
         $webhookCall = FakeMollieWebhookCall::new()
             ->forResourceId($payment->id())
             ->create();
