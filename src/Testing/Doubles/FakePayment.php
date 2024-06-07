@@ -59,7 +59,7 @@ final class FakePayment extends Payment
 
     public function withRefunds(FakeRefund ...$refunds): self
     {
-        $refunds ??= [FakeRefund::fake($this->container)];
+        $refunds = $refunds ?: [FakeRefund::fake($this->container)];
 
         $this->refunds = array_merge($this->refunds, $refunds);
 
