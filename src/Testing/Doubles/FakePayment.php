@@ -7,6 +7,7 @@ namespace Craftzing\Laravel\MollieWebhooks\Testing\Doubles;
 use Craftzing\Laravel\MollieWebhooks\Payments\PaymentId;
 use Craftzing\Laravel\MollieWebhooks\Testing\Concerns\FakesMollie;
 use Illuminate\Contracts\Container\Container;
+use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Types\PaymentStatus;
 
@@ -74,5 +75,16 @@ final class FakePayment extends Payment
     public function refunds()
     {
         return $this->refunds;
+    }
+
+    public function getRefund($refundId, array $parameters = [])
+    {
+        foreach ($this->refunds as $refund) {
+            if ((string) $refund->id() === (string) $refundId) {
+                return $refund;
+            }
+        }
+
+        throw new ApiException('Refund not found.');
     }
 }
